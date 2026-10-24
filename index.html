@@ -782,7 +782,35 @@ button.obody{cursor:pointer}
     ['atun-robinson','Atún en agua Robinson Crusoe 140 g (escurrido)','Proteínas',110,24,0,0.5,'1 lata escurrida',91],
     ['atun-vancamps','Atún en agua Van Camp\'s (escurrido)','Proteínas',107,25,1.3,0.2,'1 lata escurrida',92],
     ['atun-angelmo','Atún en agua Angelmó (escurrido)','Proteínas',90,21.6,0,0.5,'1 lata escurrida',91],
-    ['atun-sanjose','Atún en agua San José (escurrido)','Proteínas',119,23,0,0.8,'1 lata escurrida',91]
+    ['atun-sanjose','Atún en agua San José (escurrido)','Proteínas',119,23,0,0.8,'1 lata escurrida',91],
+    ['leche-surlat20-entera','Leche entera +20% proteína Surlat','Lácteos',63,3.8,4.9,3.1,'1 vaso (200 ml)',200],
+    ['leche-surlat20-semi','Leche semidescremada +20% proteína Surlat','Lácteos',46,3.9,4.9,1.2,'1 vaso (200 ml)',200],
+    ['leche-surlat-desc-prot','Leche descremada proteína sin lactosa Surlat','Lácteos',38,4.5,4.7,0.1,'1 vaso (200 ml)',200],
+    ['mcd-bigmac','Big Mac (McDonald\'s)','Platos y preparaciones',257,11.8,20.1,15.0,'1 hamburguesa',219],
+    ['mcd-cuarto','Cuarto de libra con queso (McDonald\'s)','Platos y preparaciones',258,14.6,19.9,14.2,'1 hamburguesa',199],
+    ['mcd-mcpollo','McPollo (McDonald\'s)','Platos y preparaciones',249,9.2,16.4,12.1,'1 hamburguesa',207],
+    ['mcd-cheese','Cheeseburger (McDonald\'s)','Platos y preparaciones',252,12.6,27.7,10.9,'1 hamburguesa',119],
+    ['bk-whopper','Whopper (Burger King)','Platos y preparaciones',250,11.2,16.7,15.3,'1 hamburguesa',316],
+    ['wendys-cheese','Cheeseburger (Wendy\'s)','Platos y preparaciones',221,14.9,14.2,11.6,'1 hamburguesa',236],
+    ['wendys-bigbacon','Big Bacon Classic (Wendy\'s)','Platos y preparaciones',232,11.8,13.2,14.6,'1 hamburguesa',280],
+    ['hamb-local','Hamburguesa de local con queso y tocino (tipo Juan Maestro o Mamut, estimada)','Platos y preparaciones',250,12.7,15.0,15.0,'1 hamburguesa',300],
+    ['hamb-lentejas','Hamburguesa de lentejas (solo la hamburguesa)','Platos y preparaciones',178,8.9,22.2,5.6,'1 hamburguesa',90],
+    ['papas-chicas','Papas fritas chicas','Platos y preparaciones',324,4.2,43.7,15.5,'1 porción chica',71],
+    ['papas-medianas','Papas fritas medianas','Platos y preparaciones',306,4.1,39.6,14.4,'1 porción mediana',111],
+    ['papas-grandes','Papas fritas grandes','Platos y preparaciones',331,4.5,42.9,15.6,'1 porción grande',154],
+    ['nuggets','Nuggets de pollo (6)','Platos y preparaciones',260,14.6,15.6,15.6,'6 nuggets',96],
+    ['pizza-pepperoni','Pizza de pepperoni','Platos y preparaciones',273,11.8,28.2,12.7,'1 trozo',110],
+    ['pizza-napolitana','Pizza napolitana','Platos y preparaciones',223,10.0,26.2,9.2,'1 trozo',130],
+    ['sushi-8','Sushi roll (8 piezas, con queso crema)','Platos y preparaciones',182,5.9,26.4,5.5,'8 piezas',220],
+    ['pollo-frito','Pollo frito (1 presa con piel)','Platos y preparaciones',264,17.3,8.2,17.3,'1 presa',110],
+    ['completo-palta','Completo con palta','Platos y preparaciones',248,7.1,18.1,15.7,'1 completo',210],
+    ['barros-luco','Barros Luco','Platos y preparaciones',282,17.3,18.2,15.5,'1 sándwich',220],
+    ['barros-jarpa','Barros Jarpa','Platos y preparaciones',265,12.9,21.2,14.1,'1 sándwich',170],
+    ['ave-mayo','Ave mayo','Platos y preparaciones',240,12.0,18.0,13.0,'1 sándwich',200],
+    ['milanesa-pure','Milanesa de pollo con puré','Platos y preparaciones',200,10.0,15.7,10.3,'1 plato',350],
+    ['wrap-pollo','Wrap de pollo','Platos y preparaciones',195,11.4,18.2,8.6,'1 wrap',220],
+    ['bowl-pollo','Bowl de ensalada con pollo','Platos y preparaciones',109,9.1,6.3,5.1,'1 bowl',350],
+    ['pollo-arroz-verd','Pollo con arroz y verduras','Platos y preparaciones',130,9.5,15.0,3.0,'1 plato',400]
   ].map(function(a){return {id:a[0],n:a[1],cat:a[2],k:a[3],p:a[4],c:a[5],f:a[6],pn:a[7],pg:a[8],sz:a[9]}});
   /* ---------- Cuerpo · datos propios (state.body, documento 'cuerpo' en la nube) ----------
      prof: {kg, cm, birth, act, goal, pkg, agua}   wh: historial de peso [{date,kg}]
@@ -1465,24 +1493,24 @@ button.obody{cursor:pointer}
     o+='<p class="disc">La clave solo sirve para mandar pasos a tu Aura; no permite ver tus datos. Igual no la compartas.</p></section>';
     // Paso 2: atajo
     o+='<section><div class="sh"><h2>2 · Crear el <em>atajo</em></h2></div><p class="meta">En el iPhone, abre la app <b>Atajos</b> (ícono de cuadrados de colores). Si no la tienes, descárgala gratis desde la App Store.</p><ol class="clist" style="gap:8px">'+
-      '<li>Toca <b>+</b> (arriba a la derecha). Arriba toca el nombre y escribe <b>Aura pasos</b> (igual, con mayúscula y espacio).</li>'+
-      '<li>Toca <b>Agregar acción</b>, busca <b>Buscar muestras de salud</b> y tócala.</li>'+
-      '<li>En esa acción: donde dice <b>Tipo</b>, elige <b>Pasos</b>. Toca <b>Añadir filtro</b> → <b>Fecha de inicio</b> → <b>es hoy</b>. Más abajo, en <b>Agrupar por</b>, elige <b>Día</b>. (Así el total es igual al de la app Salud, sin contar dos veces el reloj.)</li>'+
-      '<li>Abajo, en la barra de búsqueda de acciones, busca <b>Calcular estadísticas</b> y tócala. Debe decir <b>Suma</b> de <b>Muestras de salud</b>.</li>'+
-      '<li>Busca <b>Redondear</b> y toca <b>Redondear número</b> (a unidades).</li>'+
-      '<li>Busca <b>Obtener contenido de URL</b> y tócala. Donde dice <b>URL</b>, pega la dirección que copiaste arriba.</li>'+
-      '<li>En esa misma acción toca <b>Mostrar más</b>: <b>Método</b> → <b>POST</b>. <b>Cuerpo de la solicitud</b> → <b>JSON</b>.</li>'+
-      '<li>Toca <b>Añadir nuevo campo</b> → <b>Texto</b>. En la clave escribe <b>clave</b> y en el valor pega tu clave.</li>'+
-      '<li>Toca otra vez <b>Añadir nuevo campo</b> → <b>Número</b>. En la clave escribe <b>pasos</b>; en el valor toca <b>Variable</b> (o la varita sobre el teclado) y elige <b>Número redondeado</b>.</li>'+
-      '<li>(Opcional) Busca <b>Mostrar notificación</b> y pon como texto <b>Contenido de URL</b>: así verás «Aura: N pasos guardados».</li>'+
-      '<li>Toca <b>▶︎</b> abajo para probarlo. La primera vez pide permiso para leer Salud: toca <b>Permitir</b> (solo Pasos). Luego vuelve aquí y toca <b>Revisar si llegaron</b>.</li></ol></section>';
+      '<li>Ve a <b>Biblioteca</b> → <b>Todos los atajos</b> y toca el <b>+</b> de abajo al centro. Arriba toca <b>Nuevo atajo</b> → <b>Renombrar</b> y escribe <b>Aura pasos</b> (igual, con mayúscula y espacio).</li>'+
+      '<li>En la barra <b>Buscar</b> de abajo escribe <b>muestras de salud</b> y toca <b>Buscar muestras de Salud</b>. Si dice «no tiene acceso», toca <b>Permitir acceso</b> y activa <b>Pasos</b>.</li>'+
+      '<li>En esa acción: <b>Tipo es Steps</b> (Pasos) ya viene puesto. En <b>Fecha de inicio</b> toca «está entre los/las» y elige <b>es hoy</b>. En <b>Agrupar por</b> elige <b>Día</b>. No toques Unidad, Ordenar por ni Límite.</li>'+
+      '<li>Busca <b>calcular estadísticas</b> y tócala: debe decir <b>Calcular el Suma de Muestras de Salud</b>.</li>'+
+      '<li>Busca <b>redondear</b> y toca <b>Redondear número</b> (queda «Redondear Suma a Número entero»).</li>'+
+      '<li>Busca <b>obtener contenido</b> y toca <b>Obtener contenido de URL</b>. En <b>URL</b> pega la dirección de arriba. <b>Método</b> → <b>POST</b>. <b>Solicitar cuerpo</b> → <b>JSON</b>.</li>'+
+      '<li><b>Agregar nuevo campo</b> → <b>Número</b>: a la izquierda escribe <b>pasos</b>; toca el <b>0</b> y elige la variable <b>Número redondeado</b> sobre el teclado.</li>'+
+      '<li><b>Agregar nuevo campo</b> → <b>Texto</b>: a la izquierda escribe <b>clave</b> y a la derecha pega tu clave.</li>'+
+      '<li>(Opcional) Busca <b>mostrar notificación</b>, borra el texto y elige <b>Contenido de URL</b>. Apaga <b>Emitir sonido</b> si no quieres que suene.</li>'+
+      '<li><b>Revisa el orden</b>: Buscar muestras → Calcular → Redondear → Obtener contenido de URL → Notificación. Si una acción queda en otro lugar, mantenla presionada y arrástrala. «Número redondeado» en <b>rojo</b> significa que el orden está mal; en azul, bien.</li>'+
+      '<li>Toca <b>▶︎</b> (abajo a la derecha). Cuando pregunte si puede enviar muestras de salud a supabase.co, toca <b>Permitir siempre</b>. Luego vuelve aquí y toca <b>Revisar si llegaron</b>.</li></ol></section>';
     // Paso 3: automatización
     o+='<section><div class="sh"><h2>3 · Que corra <em>solo</em></h2></div><ol class="clist" style="gap:8px">'+
-      '<li>En Atajos, toca <b>Automatización</b> (abajo) → <b>+</b> o <b>Nueva automatización</b>.</li>'+
-      '<li>Elige <b>Hora del día</b>. Pon <b>12:00</b>, <b>Repetir: Diariamente</b>.</li>'+
-      '<li>Marca <b>Ejecutar inmediatamente</b> (no «tras confirmación») y desactiva <b>Notificar al ejecutar</b> si no quieres aviso.</li>'+
-      '<li>Toca <b>Siguiente</b> y elige el atajo <b>Aura pasos</b>.</li>'+
-      '<li>Repite para <b>18:00</b>, <b>21:00</b> y <b>23:50</b> (la de 23:50 deja el total final del día).</li></ol>'+
+      '<li>En Atajos: <b>Biblioteca</b> → <b>Automatización</b> → <b>+</b> de abajo. Se abre un «Nuevo atajo»: es normal.</li>'+
+      '<li>En el panel de abajo toca el botón azul <b>Automatización</b> → <b>Hora del día</b>.</li>'+
+      '<li>Toca <b>Hora</b> y pon <b>12:00 p.m.</b> Toca la flechita: <b>Repetir: Cada día</b>, <b>Automatización</b> encendida, <b>Notificar</b> apagado.</li>'+
+      '<li>Busca <b>ejecutar atajo</b>, tócala y elige <b>Aura pasos</b>. Arriba: <b>Renombrar</b> → <b>Pasos 12:00</b>.</li>'+
+      '<li>Repite para <b>6:00 p.m.</b>, <b>9:00 p.m.</b> y <b>11:50 p.m.</b> (la de 11:50 p.m. deja el total final del día).</li></ol>'+
       '<p class="disc">Cada envío reemplaza el total del día, así que da lo mismo cuántas veces corra. Si anotas minutos caminados a mano, el siguiente envío del iPhone los reemplaza (el iPhone ya los cuenta).</p></section>';
     return o;
   }
