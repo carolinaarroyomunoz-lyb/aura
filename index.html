@@ -1137,7 +1137,8 @@ button.obody{cursor:pointer}
        Finanzas: pagos de tarjetas que vencen ese día (o atrasados, solo hoy)
        Alimentación: comidas frecuentes de ese día de la semana («lo de siempre»)
        Lo ya anotado ese día (comidas, entrenamientos, medicamentos sueltos, belleza, cargas, período)
-     Etapa GitHub: los eventos de Google Calendar (incluidas las clases de ClassPass) entran como
+     Versión PWA: los eventos de los calendarios conectados (iCloud, suscripciones, Google) llegan con calSync() y se muestran como k:'cal';
+     no se guardan en items. Antes se pensó guardarlos como
      items type:'event' con src:'calendar' y ext (id del evento) para no duplicar. La vista no cambia.
      state.org (documento 'estado'): {trk:{money,steps,bm} (rastreadores visibles en Hábitos), stepGoal, nospend:[fechas sin gastos]} */
   function normOrg(o){
@@ -1146,7 +1147,7 @@ button.obody{cursor:pointer}
     ['money','steps','bm'].forEach(function(k){if(typeof o.trk[k]!=='boolean')o.trk[k]=true});
     if(!Array.isArray(o.nospend))o.nospend=[];
     var g=parseInt(o.stepGoal,10);o.stepGoal=g>=1000&&g<=50000?g:8000;
-    if(!Array.isArray(o.calHide))o.calHide=[]; // eventos de Google Calendar ocultos en Aura
+    if(!Array.isArray(o.calHide))o.calHide=[]; // eventos de los calendarios conectados que se ocultaron en Aura
     return o;
   }
   function OG(){if(!state.org||!state.org.trk)state.org=normOrg(state.org);return state.org}
@@ -1171,7 +1172,7 @@ button.obody{cursor:pointer}
       var late=today&&d&&d<t?d:'';
       if(d===ds||(!d&&today&&i.type==='task')||late)add({k:i.type,id:i.id,time:late?'':(i.time||''),title:i.title,mod:i.module,chk:true,act:1,late:late});
     });
-    calOn(ds).forEach(function(e){add({k:'cal',id:e.ext,time:e.time||'',end:e.end||'',title:e.title,sub:[e.place,'Google Calendar'].filter(Boolean).join(' · '),mod:calMod(e.title)})});
+    calOn(ds).forEach(function(e){var cm=calMod(e.title,e.cal),cn=e.cal||'Calendario';add({k:'cal',id:e.ext,time:e.time||'',end:e.end||'',title:e.title,sub:[e.place,fold(cn)===fold(cm)?'':cn].filter(Boolean).join(' · '),mod:cm})});
     H().treats.forEach(function(x){
       if(tActive(x,ds)){var ts=tTimes(x);(ts.length?ts:['']).forEach(function(tm){
         var dd=D().filter(function(z){return z.id===doseKey(x.id,tm,ds)})[0];
@@ -1257,13 +1258,16 @@ button.obody{cursor:pointer}
     return o+'</section>';
   }
 
-  /* ---------- Google Calendar (solo lectura) ----------
-     La dirección secreta (iCal) de cada calendario se guarda en la tabla cal_cfg (RLS: solo la dueña la ve).
-     La función de Supabase «calendario» la descarga y devuelve los eventos desde 14 días atrás hasta 60 adelante.
-     Aura no cambia ni borra nada en Google: «Ocultar en Aura» guarda el evento en org.calHide [{x (ext), d (fecha), t (título)}].
+  /* ---------- Calendarios del iPhone, iCloud, Google y suscripciones (solo lectura) ----------
+     Los enlaces de cada calendario (hasta 10) se guardan en la tabla cal_cfg (RLS: solo la dueña los ve). Se AGREGAN de a uno.
+       · Calendarios de iCloud (Casa, Trabajo…): enlace de «Calendario público» (webcal://pXX-caldav.icloud.com/published/…).
+       · Suscripciones (por ejemplo, partidos de Universidad Católica): la URL de la suscripción.
+       · Google Calendar: «Dirección secreta en formato iCal».
+     La función de Supabase «calendario» los descarga y devuelve los eventos desde 14 días atrás hasta 60 adelante.
+     Aura no cambia ni borra nada en el calendario: «Ocultar en Aura» guarda el evento en org.calHide [{x (ext), d (fecha), t (título)}].
      Los eventos se guardan solo en este dispositivo (localStorage 'aura-cal') para verlos sin conexión; se actualizan
      al abrir la app, al volver a ella (cada 10 minutos como máximo) y con «Actualizar». */
-  var CAL={ev:[],at:0,cals:[],st:'',busy:false,cfg:null,cfgLoaded:false,del:false,msg:''};
+  var CAL={ev:[],at:0,cals:[],st:'',busy:false,cfg:null,cfgLoaded:false,del:false,rm:-1,msg:''};
   try{var calRaw=JSON.parse(localStorage.getItem('aura-cal')||'null');if(calRaw&&Array.isArray(calRaw.ev)){CAL.ev=calRaw.ev;CAL.at=calRaw.at||0;CAL.cals=calRaw.cals||[];CAL.st=calRaw.st||''}}catch(e){}
   function calSave(){try{localStorage.setItem('aura-cal',JSON.stringify({ev:CAL.ev,at:CAL.at,cals:CAL.cals,st:CAL.st}))}catch(e){}}
   function calReset(){CAL.ev=[];CAL.at=0;CAL.cals=[];CAL.st='';CAL.cfg=null;CAL.cfgLoaded=false;try{localStorage.removeItem('aura-cal')}catch(e){}}
@@ -1283,59 +1287,68 @@ button.obody{cursor:pointer}
   function calHidden(x){return calHide().some(function(h){return h.x===x})}
   function calOn(ds){return CAL.ev.filter(function(e){return e.date===ds&&!calHidden(e.ext)})}
   function calFind(x){return CAL.ev.filter(function(e){return e.ext===x})[0]||null}
-  function calMod(t){
-    var s=fold(t||'');
+  function calIsGoogle(e){return !!e&&e.src==='google'}
+  function calMod(t,cal){
+    var s=fold(t||''),c=fold(cal||'');
     if(/classpass|barre|pilates|yoga|spinning|gimnasio|\bgym\b|entren|reformer|crossfit|funcional|hiit|zumba|trote|running|\bclass\b|workout|sculpt|cycle|stretch|natacion|boxeo/.test(s))return 'Ejercicio';
     if(/medic|doctor|\bdra?\b|control|examen|clinica|dentista|ginec|psicolog|nutri|kine|vacuna/.test(s))return 'Salud';
     if(/pago|banco|tarjeta|cuota/.test(s))return 'Finanzas';
-    if(/certamen|prueba|universidad|curso|ramo|tarea de|entrega|catedra|clase de rr|rrhh/.test(s))return 'Estudio';
+    if(/certamen|prueba|universidad de|curso|ramo|tarea de|entrega|catedra|rrhh/.test(s)&&!/catolica|\bvs\.?\b| - /.test(s))return 'Estudio';
     if(/peluquer|manicure|unas|depila|facial|matiz/.test(s))return 'Belleza';
+    if(/trabajo|oficina/.test(c))return 'Trabajo';
     return 'Casa';
   }
   function calMins(e){if(!e.time||!e.end)return 0;var m=hmMin(e.end)-hmMin(e.time);return m>0?m:0}
   function hmAt(ms){var d=new Date(ms);return pad(d.getHours())+':'+pad(d.getMinutes())}
   function calAgo(){if(!CAL.at)return '';var m=Math.round((Date.now()-CAL.at)/60000);return m<1?'recién':m<60?'hace '+m+' min':'a las '+hmAt(CAL.at)+(new Date(CAL.at).toDateString()===new Date().toDateString()?'':' del '+dshort(ymd(new Date(CAL.at))))}
-  function calMask(u){var s=String(u||'');try{var x=new URL(s.replace(/^webcal:/i,'https:'));return x.hostname+' · …'+s.slice(-12)}catch(e){return '…'+s.slice(-12)}}
-  var CAL_OK=/^(calendar\.google\.com|([a-z0-9-]+\.)*icloud\.com|outlook\.live\.com|outlook\.office365\.com|outlook\.office\.com)$/i;
-  function calUrlOk(u){try{var x=new URL(String(u).trim().replace(/^webcal:\/\//i,'https://'));return x.protocol==='https:'&&CAL_OK.test(x.hostname)}catch(e){return false}}
+  function calKind(u){var s=String(u||'');if(/icloud\.com/i.test(s))return 'iCloud';if(/calendar\.google\.com/i.test(s))return 'Google';if(/outlook\./i.test(s))return 'Outlook';return 'Suscripción'}
+  function calMask(u){var s=String(u||'');try{var x=new URL(s.replace(/^webcal:/i,'https:'));return x.hostname+' · …'+s.slice(-10)}catch(e){return '…'+s.slice(-10)}}
+  // Misma regla que la función: http, https o webcal; nada de direcciones locales ni IP.
+  function calUrlOk(u){try{var x=new URL(String(u).trim().replace(/^webcal:\/\//i,'https://'));var h=x.hostname.toLowerCase();return /^https?:$/.test(x.protocol)&&h.indexOf('.')>0&&h!=='localhost'&&!/\.(local|internal|localhost)$/.test(h)&&!/^[\d.]+$/.test(h)&&h.indexOf(':')<0}catch(e){return false}}
   function calCfgLoad(force){
-    if(!sb||!auth.user||(CAL.cfgLoaded&&!force))return;CAL.cfgLoaded=true;
-    sb.from('cal_cfg').select('urls').maybeSingle().then(function(r){CAL.cfg=(r&&r.data&&r.data.urls)||[];safeRender()},function(){CAL.cfg=null;CAL.cfgLoaded=false});
+    if(!sb||!auth.user||(CAL.cfgLoaded&&!force))return Promise.resolve(CAL.cfg||[]);CAL.cfgLoaded=true;
+    return sb.from('cal_cfg').select('urls').maybeSingle().then(function(r){CAL.cfg=(r&&r.data&&r.data.urls)||[];safeRender();return CAL.cfg},function(){CAL.cfg=null;CAL.cfgLoaded=false;return null});
   }
-  var CAL_ERR={'direccion-no-valida':'La dirección no es de Google, iCloud ni Outlook.','direccion-vencida':'Google ya no acepta esa dirección (quizás la restableciste). Pega la nueva.','no-responde':'El calendario no respondió. Prueba con Actualizar.','no-es-calendario':'Esa dirección no devolvió un calendario.'};
+  function calStore(urls){
+    if(!urls.length)return sb.from('cal_cfg').delete().eq('user_id',auth.user.id);
+    return sb.from('cal_cfg').upsert({user_id:auth.user.id,urls:urls,updated_at:new Date().toISOString()},{onConflict:'user_id'});
+  }
+  var CAL_ERR={'direccion-no-valida':'El enlace no es válido.','direccion-vencida':'El calendario ya no acepta este enlace (quizás se dejó de compartir). Quítalo y agrega el nuevo.','no-responde':'Este calendario no respondió. Prueba con Actualizar.','no-es-calendario':'Este enlace no devolvió un calendario.','muy-grande':'Este calendario es demasiado grande para leerlo.'};
   function calLine(){
     var o='<div class="ocal">';
-    if(CAL.st==='ok')o+='<span class="meta">Google Calendar · '+(CAL.busy?'actualizando…':'actualizado '+calAgo())+'</span><button class="link" type="button" data-act="calsync"'+(CAL.busy?' disabled':'')+'>Actualizar</button>';
-    else if(CAL.st==='err')o+='<span class="meta late">No pude actualizar tu calendario</span><button class="link" type="button" data-act="calsync">Reintentar</button>';
-    else o+='<span class="meta">Trae aquí tus eventos y clases</span><button class="link" type="button" data-act="gocal">Conectar Google Calendar</button>';
+    if(CAL.st==='ok')o+='<span class="meta">Tus calendarios · '+(CAL.busy?'actualizando…':'actualizados '+calAgo())+'</span><button class="link" type="button" data-act="calsync"'+(CAL.busy?' disabled':'')+'>Actualizar</button>';
+    else if(CAL.st==='err')o+='<span class="meta late">No pude actualizar tus calendarios</span><button class="link" type="button" data-act="calsync">Reintentar</button>';
+    else o+='<span class="meta">Trae aquí los eventos de tu iPhone</span><button class="link" type="button" data-act="gocal">Conectar calendarios</button>';
     return o+'</div>';
   }
   function viewCal(){
     calCfgLoad(false);
-    var saved=CAL.cfg,has=saved&&saved.length,o='';
-    o+='<section class="glass" style="padding:16px;display:flex;flex-direction:column;gap:10px"><p class="label">Google Calendar</p>';
-    if(CAL.st==='ok'&&has){
-      var nx=CAL.ev.filter(function(e){return e.date>=T()}).length;
-      o+='<p><b style="color:var(--ok)">Conectado.</b> '+nx+(nx===1?' evento':' eventos')+' en los próximos 60 días · actualizado '+calAgo()+'.</p>';
-      CAL.cals.forEach(function(c){if(!c)return;o+='<p class="meta">'+(c.ok?esc(c.name)+' · '+c.n+(c.n===1?' evento':' eventos'):'<span class="late">'+esc(CAL_ERR[c.error]||'No se pudo leer un calendario.')+'</span>')+'</p>'});
-    } else if(has) o+='<p class="muted">'+(CAL.busy?'Leyendo tu calendario…':CAL.st==='err'?'<span class="late">No pude leer tu calendario.</span> Revisa la dirección y toca Actualizar.':'Dirección guardada. Toca Actualizar para traer tus eventos.')+'</p>';
-    else o+='<p class="muted">Tus eventos aparecerán en el Organizador. Aura solo los lee: no cambia ni borra nada en Google.</p>';
-    if(has)o+='<div class="btns"><button class="btn acc sm" type="button" data-act="calsync"'+(CAL.busy?' disabled':'')+'>'+(CAL.busy?'Actualizando…':'Actualizar ahora')+'</button><button class="btn line sm" type="button" data-act="caldel" style="'+(CAL.del?'color:var(--warn);border-color:var(--warn)':'')+'">'+(CAL.del?'Toca de nuevo para desconectar':'Desconectar')+'</button></div>';
+    var saved=CAL.cfg||[],has=saved.length>0,o='';
+    o+='<section class="glass" style="padding:16px;display:flex;flex-direction:column;gap:10px"><p class="label">Tus calendarios</p>';
+    if(!CAL.cfgLoaded||CAL.cfg===null)o+='<p class="muted">Cargando…</p>';
+    else if(!has)o+='<p class="muted">Aún no conectas ninguno. Agrega abajo los calendarios de tu iPhone, de a uno. Aura solo los lee: no cambia ni borra nada.</p>';
+    else{
+      if(CAL.st==='ok'){var nx=CAL.ev.filter(function(e){return e.date>=T()}).length;o+='<p><b style="color:var(--ok)">Conectados.</b> '+nx+(nx===1?' evento':' eventos')+' en los próximos 60 días · actualizado '+calAgo()+'.</p>'}
+      else o+='<p class="muted">'+(CAL.busy?'Leyendo tus calendarios…':CAL.st==='err'?'<span class="late">No pude leer tus calendarios.</span> Toca Actualizar.':'Toca Actualizar para traer tus eventos.')+'</p>';
+      saved.forEach(function(u,i){
+        var c=CAL.cals[i],nm=c&&c.ok?c.name:calKind(u),sub=c?(c.ok?c.n+(c.n===1?' evento':' eventos'):'<span class="late">'+esc(CAL_ERR[c.error]||'No se pudo leer.')+'</span>'):calMask(u);
+        o+='<div class="row"><div class="grow"><div class="ttl">'+esc(nm)+'</div><div class="meta">'+calKind(u)+' · '+sub+'</div></div><button class="x'+(CAL.rm===i?' confirm':'')+'" type="button" data-act="calrm" data-v="'+i+'">'+(CAL.rm===i?'¿Quitar?':'Quitar')+'</button></div>';
+      });
+      o+='<div class="btns"><button class="btn acc sm" type="button" data-act="calsync"'+(CAL.busy?' disabled':'')+'>'+(CAL.busy?'Actualizando…':'Actualizar ahora')+'</button></div>';
+    }
     o+='</section>';
-    o+='<section><div class="sh"><h2>'+(has?'Cambiar o agregar <em>calendarios</em>':'Cómo <em>conectarlo</em>')+'</h2></div>'+
-      '<ol class="clist" style="gap:6px"><li>En un computador, abre <b>calendar.google.com</b>. En el iPhone esta opción no aparece (en Safari puedes pedir «Sitio de escritorio»).</li>'+
-      '<li>En la lista de la izquierda, junto a tu calendario, toca los tres puntos → <b>Configuración y uso compartido</b>.</li>'+
-      '<li>Baja hasta <b>Integrar el calendario</b> y copia la <b>Dirección secreta en formato iCal</b> (termina en <code>basic.ics</code>).</li>'+
-      '<li>Pégala aquí y toca Guardar. Si ClassPass agrega tus clases a otro calendario, pega su dirección en otra línea.</li></ol>';
-    if(has)o+='<div class="parse" style="gap:4px"><p class="label">Guardadas</p>'+saved.map(function(u){return '<p class="meta">'+esc(calMask(u))+'</p>'}).join('')+'<p class="meta">Si guardas direcciones nuevas, reemplazan a estas.</p></div>';
-    o+='<form id="cal-form" class="field" style="gap:10px"><label class="label" for="f-calurls">Dirección secreta (una por línea)</label><textarea id="f-calurls" spellcheck="false" autocapitalize="off" autocomplete="off" style="font-size:.85rem;min-height:96px" placeholder="https://calendar.google.com/calendar/ical/…/basic.ics"></textarea>'+
+    o+='<form id="cal-form" class="glass" style="padding:16px;display:flex;flex-direction:column;gap:10px"><label class="label" for="f-calurls">Agregar un calendario</label><textarea id="f-calurls" spellcheck="false" autocapitalize="off" autocomplete="off" style="font-size:.85rem;min-height:84px;padding:12px 14px;border-radius:16px;border:1px solid var(--line);background:var(--field);width:100%" placeholder="Pega aquí el enlace (webcal://… o https://…)"></textarea>'+
       (CAL.msg?'<p class="late" style="font-size:.85rem">'+esc(CAL.msg)+'</p>':'')+
-      '<button class="btn acc" type="submit">Guardar y conectar</button></form>';
-    o+='<p class="disc">Esa dirección deja ver tu calendario a quien la tenga. Aura la guarda en tu base de datos privada (solo tu cuenta puede leerla) y no la muestra completa. Si alguna vez la compartiste por error, en Google toca «Restablecer» y pega la nueva aquí.</p></section>';
+      '<button class="btn acc" type="submit">Agregar calendario</button><p class="meta">Se suma a los que ya tienes. Repite con cada calendario.</p></form>';
+    o+='<section><div class="sh"><h2>Cómo copiar el <em>enlace</em></h2></div>'+
+      '<details class="fin" open><summary>Calendarios de tu iPhone (Casa, Trabajo…)</summary><ol class="clist" style="gap:6px"><li>Abre el app <b>Calendario</b> y toca <b>Calendarios</b> (abajo al centro).</li><li>En la sección <b>iCloud</b>, toca la <b>(i)</b> del calendario.</li><li>Baja hasta el final y activa <b>Calendario público</b>.</li><li>Toca <b>Compartir enlace…</b> → <b>Copiar</b>.</li><li>Vuelve a Aura, pégalo arriba y toca <b>Agregar calendario</b>.</li></ol></details>'+
+      '<details class="fin"><summary>Suscripciones (partidos de Universidad Católica, feriados…)</summary><ol class="clist" style="gap:6px"><li>En <b>Calendario → Calendarios</b>, toca la <b>(i)</b> de la suscripción.</li><li>Toca el campo <b>URL</b>, mantén el dedo → <b>Seleccionar todo</b> → <b>Copiar</b>.</li><li>Pégalo arriba y toca <b>Agregar calendario</b>.</li></ol></details>'+
+      '<details class="fin"><summary>Google Calendar (calendario de Gmail)</summary><ol class="clist" style="gap:6px"><li>En un computador, abre <b>calendar.google.com</b>.</li><li>Junto a tu calendario, tres puntos → <b>Configuración y uso compartido</b>.</li><li>En <b>Integrar el calendario</b>, copia la <b>Dirección secreta en formato iCal</b>.</li></ol></details>'+
+      '<p class="disc">Cumpleaños, Recordatorios programados y Sugerencias de Siri no se pueden compartir desde el iPhone, así que no llegan a Aura. Quien tenga el enlace de un calendario puede ver sus eventos: no lo compartas. Para cortar el acceso, desactiva «Calendario público» en el iPhone (o «Restablecer» en Google) y quita el calendario aquí. Aura guarda los enlaces en tu base de datos privada y no los muestra completos.</p></section>';
     var hid=calHide().slice().sort(function(a,b){return a.d<b.d?-1:1});
     if(hid.length){
       o+='<section><div class="sh"><h2>Ocultos en <em>Aura</em></h2></div>';
-      hid.forEach(function(h){o+='<div class="row"><div class="grow"><div class="ttl">'+esc(h.t||'Evento')+'</div><div class="meta">'+(h.d?whenLabel(h.d):'')+' · sigue en Google Calendar</div></div><button class="btn line sm" type="button" data-act="calshow" data-id="'+esc(h.x)+'">Mostrar</button></div>'});
+      hid.forEach(function(h){o+='<div class="row"><div class="grow"><div class="ttl">'+esc(h.t||'Evento')+'</div><div class="meta">'+(h.d?whenLabel(h.d):'')+' · sigue en tu calendario</div></div><button class="btn line sm" type="button" data-act="calshow" data-id="'+esc(h.x)+'">Mostrar</button></div>'});
       o+='</section>';
     }
     return o;
@@ -1343,44 +1356,52 @@ button.obody{cursor:pointer}
   function calEvSheet(){
     var f=ui.form||{},e=calFind(f.x),hid=e&&calHidden(e.ext);
     if(!e)return sheetHead('Evento','')+'<p class="muted">Este evento ya no está en tu calendario. Puede que lo hayan cancelado o movido.</p>';
-    var mod=calMod(e.title),mins=calMins(e),ex=mod==='Ejercicio'?matchEx(e.title):null,p=e.date.split('-');
+    var mod=calMod(e.title,e.cal),mins=calMins(e),p=e.date.split('-');
     var o=sheetHead(esc(e.title),dayTitle(e.date).replace(/<\/?em>/g,'')+' · '+(e.allDay?'todo el día':e.time+(e.end?'–'+e.end:'')));
-    o+=facts([['Lugar',esc(e.place||'')],['Calendario',esc(e.cal||'Google Calendar')],['Duración',mins?mins+' min':''],['Módulo',esc(mod)]]);
+    o+=facts([['Lugar',esc(e.place||'')],['Calendario',esc(e.cal||'Calendario')],['Duración',mins?mins+' min':''],['Módulo',esc(mod)]]);
     o+='<div class="btns">';
     if(mod==='Ejercicio'&&e.date<=T())o+='<button class="btn acc" type="button" data-act="calwk" data-id="'+esc(e.ext)+'">Ya fui: anotar entrenamiento</button>';
     o+='<button class="btn line" type="button" data-act="calhide" data-id="'+esc(e.ext)+'">'+(hid?'Volver a mostrar':'Ocultar en Aura')+'</button></div>';
-    o+='<a class="btn line sm" style="align-self:flex-start" href="https://calendar.google.com/calendar/r/day/'+p[0]+'/'+(+p[1])+'/'+(+p[2])+'" target="_blank" rel="noopener">Abrir este día en Google Calendar</a>';
-    o+='<p class="disc">Aura solo lee tu calendario. Para borrar el evento de verdad, hazlo en Google Calendar o en ClassPass; aquí desaparece en la próxima actualización. «Ocultar en Aura» lo saca solo de tu Organizador.</p>';
+    if(calIsGoogle(e))o+='<a class="btn line sm" style="align-self:flex-start" href="https://calendar.google.com/calendar/r/day/'+p[0]+'/'+(+p[1])+'/'+(+p[2])+'" target="_blank" rel="noopener">Abrir este día en Google Calendar</a>';
+    o+='<p class="disc">Aura solo lee tu calendario. Para borrar el evento de verdad, hazlo en el app Calendario del iPhone (o en ClassPass); aquí desaparece en la próxima actualización. «Ocultar en Aura» lo saca solo de tu Organizador.</p>';
     return o;
   }
   function calSubmit(fm){
     if(fm.id!=='cal-form')return false;
-    var lines=String(($('f-calurls')||{}).value||'').split(/[\s,]+/).map(function(x){return x.trim()}).filter(Boolean);
-    if(!lines.length){CAL.msg='Pega la dirección secreta de tu calendario.';render();return true}
+    var lines=String(($('f-calurls')||{}).value||'').split(/\s+/).map(function(x){return x.trim()}).filter(Boolean);
+    if(!lines.length){CAL.msg='Pega el enlace de un calendario.';render();return true}
     var bad=lines.filter(function(u){return !calUrlOk(u)});
-    if(bad.length){CAL.msg='Esa dirección no parece de Google Calendar. Debe empezar con https://calendar.google.com/calendar/ical/ y terminar en .ics.';render();return true}
-    if(lines.length>5){CAL.msg='Hasta 5 calendarios.';render();return true}
-    if(!sb||!auth.user){toast('Inicia sesión para conectar tu calendario');return true}
+    if(bad.length){CAL.msg='Eso no parece un enlace de calendario. Debe empezar con webcal:// o https://';render();return true}
+    if(!sb||!auth.user){toast('Inicia sesión para conectar tus calendarios');return true}
     CAL.msg='';toast('Guardando…');
-    sb.from('cal_cfg').upsert({user_id:auth.user.id,urls:lines,updated_at:new Date().toISOString()},{onConflict:'user_id'}).then(function(r){
-      if(r.error){CAL.msg='No se pudo guardar. Revisa tu conexión e intenta de nuevo.';render();return}
-      CAL.cfg=lines;CAL.cfgLoaded=true;var ta=$('f-calurls');if(ta)ta.value='';render();toast('Guardado. Leyendo tu calendario…');
-      calSync(true).then(function(){if(CAL.st==='ok')toast(CAL.ev.length+(CAL.ev.length===1?' evento':' eventos')+' en tu Organizador')});
+    calCfgLoad(true).then(function(cur){
+      if(cur===null){CAL.msg='No se pudo guardar. Revisa tu conexión e intenta de nuevo.';render();return}
+      var norm=function(u){return String(u).trim().replace(/^webcal:\/\//i,'https://').toLowerCase()},have={},all=[];
+      cur.concat(lines).forEach(function(u){var k=norm(u);if(!have[k]){have[k]=1;all.push(String(u).trim())}});
+      var added=all.length-cur.length;
+      if(!added){toast('Ese calendario ya estaba agregado');var t0=$('f-calurls');if(t0)t0.value='';return}
+      if(all.length>10){CAL.msg='Hasta 10 calendarios.';render();return}
+      calStore(all).then(function(r){
+        if(r.error){CAL.msg='No se pudo guardar. Revisa tu conexión e intenta de nuevo.';render();return}
+        CAL.cfg=all;var ta=$('f-calurls');if(ta)ta.value='';render();toast('Agregado. Leyendo tus calendarios…');
+        calSync(true).then(function(){if(CAL.st==='ok'){var c=CAL.cals[all.length-1];toast(c&&c.ok?c.name+': '+c.n+(c.n===1?' evento':' eventos'):'Listo')}else toast('No pude leer el calendario. Revisa el enlace.')});
+      });
     });
     return true;
   }
   function calClick(a,b,id){
     switch(a){
       case 'calview': goSheet('calev',{x:id}); return true;
-      case 'calsync': calSync(true).then(function(){if(CAL.st==='err')toast('No pude actualizar tu calendario');}); return true;
+      case 'calsync': calSync(true).then(function(){if(CAL.st==='err')toast('No pude actualizar tus calendarios');}); return true;
       case 'gocal': closeSheet(); ui.view='mas'; ui.msub='cal'; render(); window.scrollTo(0,0); return true;
-      case 'calhide': var e=calFind(id),h=calHide(),ix=-1; h.forEach(function(x,i){if(x.x===id)ix=i}); if(ix>-1){h.splice(ix,1);toast('Vuelve a aparecer en tu Organizador')}else if(e){h.push({x:e.ext,d:e.date,t:e.title});toast('Oculto en Aura. Sigue en Google Calendar.')} OG().calHide=h.filter(function(x){return x.d>=plusDays(T(),-60)}); save(); closeSheet(); render(); return true;
+      case 'calhide': var e=calFind(id),h=calHide(),ix=-1; h.forEach(function(x,i){if(x.x===id)ix=i}); if(ix>-1){h.splice(ix,1);toast('Vuelve a aparecer en tu Organizador')}else if(e){h.push({x:e.ext,d:e.date,t:e.title});toast('Oculto en Aura. Sigue en tu calendario.')} OG().calHide=h.filter(function(x){return x.d>=plusDays(T(),-60)}); save(); closeSheet(); render(); return true;
       case 'calshow': OG().calHide=calHide().filter(function(x){return x.x!==id}); save(); render(); toast('Vuelve a aparecer en tu Organizador'); return true;
       case 'calwk': var w=calFind(id); if(w){var wx=matchEx(w.title),mn=calMins(w)||(wx?wx.min:45); goSheet('workout',{ex:wx?wx.id:'',min:String(mn),minTyped:true,lastEx:wx?wx.id:'',it:'moderada',direct:true,ldate:w.date,ltime:w.time||'',note:wx?'':w.title})} return true;
-      case 'caldel': if(!CAL.del){CAL.del=true;render();return true} CAL.del=false; if(!sb||!auth.user)return true;
-        sb.from('cal_cfg').delete().eq('user_id',auth.user.id).then(function(r){if(r.error){toast('No se pudo desconectar');return}calReset();CAL.cfg=[];CAL.cfgLoaded=true;CAL.st='off';render();toast('Calendario desconectado')}); return true;
+      case 'calrm': var ri=+b.getAttribute('data-v'); if(CAL.rm!==ri){CAL.rm=ri;render();return true} CAL.rm=-1; if(!sb||!auth.user)return true;
+        var left=(CAL.cfg||[]).filter(function(u,i){return i!==ri});
+        calStore(left).then(function(r){if(r.error){toast('No se pudo quitar');return}CAL.cfg=left;if(!left.length){calReset();CAL.cfg=[];CAL.cfgLoaded=true;CAL.st='off';render()}else{render();calSync(true)}toast('Calendario quitado')}); return true;
     }
-    if(CAL.del&&a!=='caldel'){CAL.del=false}
+    if(CAL.rm>-1&&a!=='calrm'){CAL.rm=-1}
     return false;
   }
 
