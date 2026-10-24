@@ -483,6 +483,8 @@ button.obody{cursor:pointer}
 .onow span{flex:0 0 3.1rem; text-align:right}
 .onow::after{content:""; flex:1; height:1.5px; background:var(--warn); border-radius:1px}
 .oend{align-self:flex-start}
+.ocal{display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; border-top:1px solid var(--line); padding-top:6px}
+.ocal .meta{min-width:0}
 
 /* Hábitos automáticos */
 .habit .tv{font-size:.8rem; font-weight:700; font-variant-numeric:tabular-nums; overflow-wrap:anywhere}
@@ -738,8 +740,49 @@ button.obody{cursor:pointer}
     ['mayonesa','Mayonesa','Aceites y aderezos',680,1,0.6,75,'1 cucharada',15],
     ['ketchup','Ketchup','Aceites y aderezos',112,1.2,26,0.1,'1 cucharada',15],
     ['pebre','Pebre','Aceites y aderezos',40,1,4,2.5,'1 cucharada',15],
-    ['endulzante','Endulzante (sucralosa o stevia)','Aceites y aderezos',0,0,0,0,'1 sobre',1]
-  ].map(function(a){return {id:a[0],n:a[1],cat:a[2],k:a[3],p:a[4],c:a[5],f:a[6],pn:a[7],pg:a[8]}});
+    ['endulzante','Endulzante (sucralosa o stevia)','Aceites y aderezos',0,0,0,0,'1 sobre',1],
+    ['huevo-copa','Huevo a la copa','Proteínas',143,12.6,0.7,9.5,'1 huevo mediano',44,[['Pequeño',38],['Mediano',44],['Grande',50]]],
+    ['huevo-plancha','Huevo a la plancha (sin aceite)','Proteínas',143,12.6,0.7,9.5,'1 huevo mediano',44,[['Pequeño',38],['Mediano',44],['Grande',50]]],
+    ['huevo-duro','Huevo duro','Proteínas',143,12.6,0.7,9.5,'1 huevo mediano',44,[['Pequeño',38],['Mediano',44],['Grande',50]]],
+    ['huevo-revuelto','Huevos revueltos (sin aceite)','Proteínas',143,12.6,0.7,9.5,'1 huevo mediano',44,[['Pequeño',38],['Mediano',44],['Grande',50]]],
+    ['yog-surlat','Yogur Surlat Whey Protein natural 140 g','Lácteos',73,8.6,5.7,1.7,'1 pote',140],
+    ['yog-soprole-prot','Yogur Soprole Proteína natural 155 g','Lácteos',68,6.6,6.3,1.8,'1 pote',155],
+    ['yog-loncoleche-prot','Yogur Loncoleche Proteína natural endulzado 140 g','Lácteos',60,8.8,5.9,0.1,'1 pote',140],
+    ['yog-colun-plus','Yogur Colun Protein Plus natural sin azúcar 150 g','Lácteos',64,7.4,5.9,0.32,'1 pote',150],
+    ['yog-quillayes-berries','Yogur griego Quillayes Proteína berries 110 g','Lácteos',76,8,6.2,2.1,'1 pote',110],
+    ['yog-quillayes-durazno','Yogur griego Quillayes Proteína durazno 110 g','Lácteos',79,8,7,2.1,'1 pote',110],
+    ['leche-surlat-choco','Leche Surlat Whey Protein chocolate (caja 200 ml)','Lácteos',57,7.5,5.6,0.5,'1 caja',200],
+    ['leche-surlat-caramel','Leche Surlat Whey Protein salted caramel (caja 200 ml)','Lácteos',55,7.5,5.1,0.5,'1 caja',200],
+    ['mokate-latte','Mokate Gold Latte Classic (1 sobre, con agua)','Bebidas',421,5,79.3,9.3,'1 sobre',14],
+    ['qcrema-philadelphia','Queso crema Philadelphia','Lácteos',266,5.8,3.4,26,'1 cucharada',15],
+    ['qcrema-colun','Queso crema Colun natural','Lácteos',238,16,4.2,17.5,'1 cucharada',15],
+    ['qcrema-soprole','Queso crema Soprole natural','Lácteos',260,15.3,0,20.2,'1 cucharadita',12],
+    ['queso-surlat-prot','Queso gauda proteína sin lactosa Surlat (láminas)','Lácteos',258,30.3,2.9,13.9,'2 láminas',34],
+    ['queso-colun-light','Queso gauda light Colun (láminas)','Lácteos',255,30,0,15,'2 láminas',34],
+    ['queso-surlat-gouda','Queso gouda sin lactosa Surlat (láminas)','Lácteos',341,24.2,0,26,'2 láminas',34],
+    ['queso-surlat-mantecoso','Queso mantecoso sin lactosa Surlat (láminas)','Lácteos',377,22.4,0,29.5,'2 láminas',34],
+    ['queso-colun-ranco','Queso gauda ranco Colun (láminas)','Lácteos',330,24,0,26,'1 rebanada',33],
+    ['queso-soprole-gauda','Queso gauda Soprole (láminas)','Lácteos',341,23.2,2,26.7,'1 lámina',17.8],
+    ['queso-soprole-quilque','Queso mantecoso Soprole Quilque (láminas)','Lácteos',359,23.6,7,26.3,'1 lámina',17.8],
+    ['queso-quillayes-mant','Queso mantecoso Quillayes (láminas)','Lácteos',362,22.1,0.5,30.4,'2 rebanadas',33],
+    ['queso-colun-fundido','Queso mantecoso fundido Colun (laminado)','Lácteos',288,18.3,5.2,21.6,'1 rebanada',20],
+    ['queso-quillayes-vegano','Queso vegano tipo gauda Quillayes (láminas)','Lácteos',318,3,18,26,'1 lámina',20],
+    ['pan-castano-int','Pan integral Castaño','Panes y cereales',232,11.9,39.8,3,'2 rebanadas',53],
+    ['pan-castano-light','Pan integral light Castaño','Panes y cereales',189,12.8,30,2,'2 rebanadas',45],
+    ['pan-castano-bollo','Bollo integral Castaño','Panes y cereales',269,13.5,49.9,2.8,'1 bollo',40],
+    ['pan-ideal-int','Pan integral clásico Ideal','Panes y cereales',239,12,44,1.7,'2 rebanadas',54],
+    ['pan-fuchs-int','Pan integral clásico Fuchs','Panes y cereales',272,13,45,4.4,'2 rebanadas',57],
+    ['pan-fuchs-multi','Pan multigrano light Fuchs','Panes y cereales',214,12,38,1.5,'2 rebanadas',72],
+    ['pan-fuchs-linaza','Pan linaza chía Fuchs','Panes y cereales',250,14,38,4.7,'2 rebanadas',72],
+    ['pan-jumbo-int','Pan de molde integral grande Jumbo','Panes y cereales',283,7.8,49,4,'2 rebanadas',80],
+    ['pan-pita-ideal','Pan pita integral Ideal','Panes y cereales',236,8.7,47,1.5,'1 unidad',43],
+    ['pan-pita-ideal-light','Pan pita integral light Ideal','Panes y cereales',226,9,44,1.6,'1 unidad',43],
+    ['atun-lider','Atún en agua Lider 140 g (escurrido)','Proteínas',108,25,0,0.9,'1 lata escurrida',91],
+    ['atun-robinson','Atún en agua Robinson Crusoe 140 g (escurrido)','Proteínas',110,24,0,0.5,'1 lata escurrida',91],
+    ['atun-vancamps','Atún en agua Van Camp\'s (escurrido)','Proteínas',107,25,1.3,0.2,'1 lata escurrida',92],
+    ['atun-angelmo','Atún en agua Angelmó (escurrido)','Proteínas',90,21.6,0,0.5,'1 lata escurrida',91],
+    ['atun-sanjose','Atún en agua San José (escurrido)','Proteínas',119,23,0,0.8,'1 lata escurrida',91]
+  ].map(function(a){return {id:a[0],n:a[1],cat:a[2],k:a[3],p:a[4],c:a[5],f:a[6],pn:a[7],pg:a[8],sz:a[9]}});
   /* ---------- Cuerpo · datos propios (state.body, documento 'cuerpo' en la nube) ----------
      prof: {kg, cm, birth, act, goal, pkg, agua}   wh: historial de peso [{date,kg}]
      favs: ids de ejercicios predeterminados   exs: ejercicios propios   foods: alimentos propios
@@ -923,7 +966,7 @@ button.obody{cursor:pointer}
       else if(!u&&ev==='SIGNED_OUT'){endSession()}
     });
     sb.auth.getSession().then(function(r){var ss=r.data&&r.data.session;if(ss&&ss.user){if(!auth.user){auth.user=ss.user;auth.checked=true;beginSync()}}else{auth.checked=true;render()}},function(){auth.checked=true;render()});
-    document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')refreshCloud()});
+    document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible'){refreshCloud();calSync(false)}});
     window.addEventListener('online',function(){if(cloud.ready){cloud.chain=cloud.chain.then(syncNow);refreshCloud()}});
   }
   function beginSync(){
@@ -936,7 +979,7 @@ button.obody{cursor:pointer}
         // Cuenta nueva: no se suben los datos de ejemplo. Se abre Respaldo para pegar el respaldo del artefacto.
         cloud.last={};auth.fresh=true;state.items=state.items.filter(function(x){return !x.example});state.logs=state.logs.filter(function(x){return !x.example});
         ui.view='mas';ui.msub='datos';setStatus('nube');render();toast('Cuenta lista. Pega tu respaldo para traer tus datos.');return}
-      applyDocs(snap);setStatus('nube');safeRender();
+      applyDocs(snap);setStatus('nube');safeRender();calSync(true);
     },function(){setStatus('error');render()});
     if(cloud.ch)sb.removeChannel(cloud.ch);
     cloud.ch=sb.channel('docs-'+uid).on('postgres_changes',{event:'*',schema:'public',table:'docs',filter:'user_id=eq.'+uid},function(){refreshCloud()}).subscribe();
@@ -945,6 +988,7 @@ button.obody{cursor:pointer}
     if(cloud.ch&&sb)sb.removeChannel(cloud.ch);cloud.ch=null;
     auth.user=null;auth.fresh=false;cloud.ready=false;cloud.col=null;cloud.last={};FILES.assets=null;
     try{localStorage.removeItem(KEY);localStorage.removeItem('aura-fin-ui')}catch(e){}
+    calReset();
     state=seed();normHealth(state.health);state.body=normBody(state.body);state.fin=normFin(state.fin);state.org=normOrg(state.org);
     closeSheet();ui.view='dia';render();
   }
@@ -1102,6 +1146,7 @@ button.obody{cursor:pointer}
     ['money','steps','bm'].forEach(function(k){if(typeof o.trk[k]!=='boolean')o.trk[k]=true});
     if(!Array.isArray(o.nospend))o.nospend=[];
     var g=parseInt(o.stepGoal,10);o.stepGoal=g>=1000&&g<=50000?g:8000;
+    if(!Array.isArray(o.calHide))o.calHide=[]; // eventos de Google Calendar ocultos en Aura
     return o;
   }
   function OG(){if(!state.org||!state.org.trk)state.org=normOrg(state.org);return state.org}
@@ -1126,6 +1171,7 @@ button.obody{cursor:pointer}
       var late=today&&d&&d<t?d:'';
       if(d===ds||(!d&&today&&i.type==='task')||late)add({k:i.type,id:i.id,time:late?'':(i.time||''),title:i.title,mod:i.module,chk:true,act:1,late:late});
     });
+    calOn(ds).forEach(function(e){add({k:'cal',id:e.ext,time:e.time||'',end:e.end||'',title:e.title,sub:[e.place,'Google Calendar'].filter(Boolean).join(' · '),mod:calMod(e.title)})});
     H().treats.forEach(function(x){
       if(tActive(x,ds)){var ts=tTimes(x);(ts.length?ts:['']).forEach(function(tm){
         var dd=D().filter(function(z){return z.id===doseKey(x.id,tm,ds)})[0];
@@ -1175,6 +1221,7 @@ button.obody{cursor:pointer}
     else if(e.k==='plan'&&e.chk)side='<button class="btn line sm" type="button" data-act="oplan" data-id="'+e.id+'">Anotar</button>';
     else if(e.k==='pend'&&today)side='<button class="btn line sm" type="button" data-act="pnow" data-id="'+e.id+'">Registrar</button>';
     if(e.k==='event'||e.k==='task'||e.k==='reminder')open='data-act="iedit" data-id="'+e.id+'"';
+    else if(e.k==='cal')open='data-act="calview" data-id="'+esc(e.id)+'"';
     else if(e.k==='ctrl')open='data-act="hview" data-t="ctrl" data-id="'+e.id+'"';
     else if(e.k==='med')open='data-act="hview" data-t="treat" data-id="'+e.id+'"';
     else if(e.k==='exam')open='data-act="hview" data-t="exam" data-id="'+e.id+'"';
@@ -1205,8 +1252,136 @@ button.obody{cursor:pointer}
       return g+'</div></div>';
     }
     o+=grp('Atrasado',late)+grp('Durante el día',free)+grp('Por hora',timed,today);
+    o+=calLine();
     if(ds<=t&&(a.length||logsOn(ds).length))o+='<button class="btn line sm oend" type="button" data-act="dsum" data-v="'+ds+'">'+(today?'Ver cómo va tu día':'Ver el resumen de ese día')+'</button>';
     return o+'</section>';
+  }
+
+  /* ---------- Google Calendar (solo lectura) ----------
+     La dirección secreta (iCal) de cada calendario se guarda en la tabla cal_cfg (RLS: solo la dueña la ve).
+     La función de Supabase «calendario» la descarga y devuelve los eventos desde 14 días atrás hasta 60 adelante.
+     Aura no cambia ni borra nada en Google: «Ocultar en Aura» guarda el evento en org.calHide [{x (ext), d (fecha), t (título)}].
+     Los eventos se guardan solo en este dispositivo (localStorage 'aura-cal') para verlos sin conexión; se actualizan
+     al abrir la app, al volver a ella (cada 10 minutos como máximo) y con «Actualizar». */
+  var CAL={ev:[],at:0,cals:[],st:'',busy:false,cfg:null,cfgLoaded:false,del:false,msg:''};
+  try{var calRaw=JSON.parse(localStorage.getItem('aura-cal')||'null');if(calRaw&&Array.isArray(calRaw.ev)){CAL.ev=calRaw.ev;CAL.at=calRaw.at||0;CAL.cals=calRaw.cals||[];CAL.st=calRaw.st||''}}catch(e){}
+  function calSave(){try{localStorage.setItem('aura-cal',JSON.stringify({ev:CAL.ev,at:CAL.at,cals:CAL.cals,st:CAL.st}))}catch(e){}}
+  function calReset(){CAL.ev=[];CAL.at=0;CAL.cals=[];CAL.st='';CAL.cfg=null;CAL.cfgLoaded=false;try{localStorage.removeItem('aura-cal')}catch(e){}}
+  function calRefreshView(){if(ui.sheet==='calev'){renderSheet();return}safeRender()}
+  function calSync(force){
+    if(!sb||!auth.user||CAL.busy)return Promise.resolve();
+    if(!force&&Date.now()-CAL.at<600000)return Promise.resolve();
+    CAL.busy=true;if(force)calRefreshView();
+    return sb.functions.invoke('calendario',{body:{}}).then(function(r){
+      CAL.busy=false;var d=r&&r.data;
+      if(r.error||!d||!d.ok){CAL.st=CAL.st==='off'?'off':'err';calRefreshView();return}
+      if(!d.configured){CAL.st='off';CAL.ev=[];CAL.cals=[]}else{CAL.st='ok';CAL.ev=Array.isArray(d.events)?d.events:[];CAL.cals=Array.isArray(d.cals)?d.cals:[]}
+      CAL.at=Date.now();calSave();calRefreshView();
+    },function(){CAL.busy=false;CAL.st=CAL.st==='off'?'off':'err';calRefreshView()});
+  }
+  function calHide(){var o=OG();if(!Array.isArray(o.calHide))o.calHide=[];return o.calHide}
+  function calHidden(x){return calHide().some(function(h){return h.x===x})}
+  function calOn(ds){return CAL.ev.filter(function(e){return e.date===ds&&!calHidden(e.ext)})}
+  function calFind(x){return CAL.ev.filter(function(e){return e.ext===x})[0]||null}
+  function calMod(t){
+    var s=fold(t||'');
+    if(/classpass|barre|pilates|yoga|spinning|gimnasio|\bgym\b|entren|reformer|crossfit|funcional|hiit|zumba|trote|running|\bclass\b|workout|sculpt|cycle|stretch|natacion|boxeo/.test(s))return 'Ejercicio';
+    if(/medic|doctor|\bdra?\b|control|examen|clinica|dentista|ginec|psicolog|nutri|kine|vacuna/.test(s))return 'Salud';
+    if(/pago|banco|tarjeta|cuota/.test(s))return 'Finanzas';
+    if(/certamen|prueba|universidad|curso|ramo|tarea de|entrega|catedra|clase de rr|rrhh/.test(s))return 'Estudio';
+    if(/peluquer|manicure|unas|depila|facial|matiz/.test(s))return 'Belleza';
+    return 'Casa';
+  }
+  function calMins(e){if(!e.time||!e.end)return 0;var m=hmMin(e.end)-hmMin(e.time);return m>0?m:0}
+  function hmAt(ms){var d=new Date(ms);return pad(d.getHours())+':'+pad(d.getMinutes())}
+  function calAgo(){if(!CAL.at)return '';var m=Math.round((Date.now()-CAL.at)/60000);return m<1?'recién':m<60?'hace '+m+' min':'a las '+hmAt(CAL.at)+(new Date(CAL.at).toDateString()===new Date().toDateString()?'':' del '+dshort(ymd(new Date(CAL.at))))}
+  function calMask(u){var s=String(u||'');try{var x=new URL(s.replace(/^webcal:/i,'https:'));return x.hostname+' · …'+s.slice(-12)}catch(e){return '…'+s.slice(-12)}}
+  var CAL_OK=/^(calendar\.google\.com|([a-z0-9-]+\.)*icloud\.com|outlook\.live\.com|outlook\.office365\.com|outlook\.office\.com)$/i;
+  function calUrlOk(u){try{var x=new URL(String(u).trim().replace(/^webcal:\/\//i,'https://'));return x.protocol==='https:'&&CAL_OK.test(x.hostname)}catch(e){return false}}
+  function calCfgLoad(force){
+    if(!sb||!auth.user||(CAL.cfgLoaded&&!force))return;CAL.cfgLoaded=true;
+    sb.from('cal_cfg').select('urls').maybeSingle().then(function(r){CAL.cfg=(r&&r.data&&r.data.urls)||[];safeRender()},function(){CAL.cfg=null;CAL.cfgLoaded=false});
+  }
+  var CAL_ERR={'direccion-no-valida':'La dirección no es de Google, iCloud ni Outlook.','direccion-vencida':'Google ya no acepta esa dirección (quizás la restableciste). Pega la nueva.','no-responde':'El calendario no respondió. Prueba con Actualizar.','no-es-calendario':'Esa dirección no devolvió un calendario.'};
+  function calLine(){
+    var o='<div class="ocal">';
+    if(CAL.st==='ok')o+='<span class="meta">Google Calendar · '+(CAL.busy?'actualizando…':'actualizado '+calAgo())+'</span><button class="link" type="button" data-act="calsync"'+(CAL.busy?' disabled':'')+'>Actualizar</button>';
+    else if(CAL.st==='err')o+='<span class="meta late">No pude actualizar tu calendario</span><button class="link" type="button" data-act="calsync">Reintentar</button>';
+    else o+='<span class="meta">Trae aquí tus eventos y clases</span><button class="link" type="button" data-act="gocal">Conectar Google Calendar</button>';
+    return o+'</div>';
+  }
+  function viewCal(){
+    calCfgLoad(false);
+    var saved=CAL.cfg,has=saved&&saved.length,o='';
+    o+='<section class="glass" style="padding:16px;display:flex;flex-direction:column;gap:10px"><p class="label">Google Calendar</p>';
+    if(CAL.st==='ok'&&has){
+      var nx=CAL.ev.filter(function(e){return e.date>=T()}).length;
+      o+='<p><b style="color:var(--ok)">Conectado.</b> '+nx+(nx===1?' evento':' eventos')+' en los próximos 60 días · actualizado '+calAgo()+'.</p>';
+      CAL.cals.forEach(function(c){if(!c)return;o+='<p class="meta">'+(c.ok?esc(c.name)+' · '+c.n+(c.n===1?' evento':' eventos'):'<span class="late">'+esc(CAL_ERR[c.error]||'No se pudo leer un calendario.')+'</span>')+'</p>'});
+    } else if(has) o+='<p class="muted">'+(CAL.busy?'Leyendo tu calendario…':CAL.st==='err'?'<span class="late">No pude leer tu calendario.</span> Revisa la dirección y toca Actualizar.':'Dirección guardada. Toca Actualizar para traer tus eventos.')+'</p>';
+    else o+='<p class="muted">Tus eventos aparecerán en el Organizador. Aura solo los lee: no cambia ni borra nada en Google.</p>';
+    if(has)o+='<div class="btns"><button class="btn acc sm" type="button" data-act="calsync"'+(CAL.busy?' disabled':'')+'>'+(CAL.busy?'Actualizando…':'Actualizar ahora')+'</button><button class="btn line sm" type="button" data-act="caldel" style="'+(CAL.del?'color:var(--warn);border-color:var(--warn)':'')+'">'+(CAL.del?'Toca de nuevo para desconectar':'Desconectar')+'</button></div>';
+    o+='</section>';
+    o+='<section><div class="sh"><h2>'+(has?'Cambiar o agregar <em>calendarios</em>':'Cómo <em>conectarlo</em>')+'</h2></div>'+
+      '<ol class="clist" style="gap:6px"><li>En un computador, abre <b>calendar.google.com</b>. En el iPhone esta opción no aparece (en Safari puedes pedir «Sitio de escritorio»).</li>'+
+      '<li>En la lista de la izquierda, junto a tu calendario, toca los tres puntos → <b>Configuración y uso compartido</b>.</li>'+
+      '<li>Baja hasta <b>Integrar el calendario</b> y copia la <b>Dirección secreta en formato iCal</b> (termina en <code>basic.ics</code>).</li>'+
+      '<li>Pégala aquí y toca Guardar. Si ClassPass agrega tus clases a otro calendario, pega su dirección en otra línea.</li></ol>';
+    if(has)o+='<div class="parse" style="gap:4px"><p class="label">Guardadas</p>'+saved.map(function(u){return '<p class="meta">'+esc(calMask(u))+'</p>'}).join('')+'<p class="meta">Si guardas direcciones nuevas, reemplazan a estas.</p></div>';
+    o+='<form id="cal-form" class="field" style="gap:10px"><label class="label" for="f-calurls">Dirección secreta (una por línea)</label><textarea id="f-calurls" spellcheck="false" autocapitalize="off" autocomplete="off" style="font-size:.85rem;min-height:96px" placeholder="https://calendar.google.com/calendar/ical/…/basic.ics"></textarea>'+
+      (CAL.msg?'<p class="late" style="font-size:.85rem">'+esc(CAL.msg)+'</p>':'')+
+      '<button class="btn acc" type="submit">Guardar y conectar</button></form>';
+    o+='<p class="disc">Esa dirección deja ver tu calendario a quien la tenga. Aura la guarda en tu base de datos privada (solo tu cuenta puede leerla) y no la muestra completa. Si alguna vez la compartiste por error, en Google toca «Restablecer» y pega la nueva aquí.</p></section>';
+    var hid=calHide().slice().sort(function(a,b){return a.d<b.d?-1:1});
+    if(hid.length){
+      o+='<section><div class="sh"><h2>Ocultos en <em>Aura</em></h2></div>';
+      hid.forEach(function(h){o+='<div class="row"><div class="grow"><div class="ttl">'+esc(h.t||'Evento')+'</div><div class="meta">'+(h.d?whenLabel(h.d):'')+' · sigue en Google Calendar</div></div><button class="btn line sm" type="button" data-act="calshow" data-id="'+esc(h.x)+'">Mostrar</button></div>'});
+      o+='</section>';
+    }
+    return o;
+  }
+  function calEvSheet(){
+    var f=ui.form||{},e=calFind(f.x),hid=e&&calHidden(e.ext);
+    if(!e)return sheetHead('Evento','')+'<p class="muted">Este evento ya no está en tu calendario. Puede que lo hayan cancelado o movido.</p>';
+    var mod=calMod(e.title),mins=calMins(e),ex=mod==='Ejercicio'?matchEx(e.title):null,p=e.date.split('-');
+    var o=sheetHead(esc(e.title),dayTitle(e.date).replace(/<\/?em>/g,'')+' · '+(e.allDay?'todo el día':e.time+(e.end?'–'+e.end:'')));
+    o+=facts([['Lugar',esc(e.place||'')],['Calendario',esc(e.cal||'Google Calendar')],['Duración',mins?mins+' min':''],['Módulo',esc(mod)]]);
+    o+='<div class="btns">';
+    if(mod==='Ejercicio'&&e.date<=T())o+='<button class="btn acc" type="button" data-act="calwk" data-id="'+esc(e.ext)+'">Ya fui: anotar entrenamiento</button>';
+    o+='<button class="btn line" type="button" data-act="calhide" data-id="'+esc(e.ext)+'">'+(hid?'Volver a mostrar':'Ocultar en Aura')+'</button></div>';
+    o+='<a class="btn line sm" style="align-self:flex-start" href="https://calendar.google.com/calendar/r/day/'+p[0]+'/'+(+p[1])+'/'+(+p[2])+'" target="_blank" rel="noopener">Abrir este día en Google Calendar</a>';
+    o+='<p class="disc">Aura solo lee tu calendario. Para borrar el evento de verdad, hazlo en Google Calendar o en ClassPass; aquí desaparece en la próxima actualización. «Ocultar en Aura» lo saca solo de tu Organizador.</p>';
+    return o;
+  }
+  function calSubmit(fm){
+    if(fm.id!=='cal-form')return false;
+    var lines=String(($('f-calurls')||{}).value||'').split(/[\s,]+/).map(function(x){return x.trim()}).filter(Boolean);
+    if(!lines.length){CAL.msg='Pega la dirección secreta de tu calendario.';render();return true}
+    var bad=lines.filter(function(u){return !calUrlOk(u)});
+    if(bad.length){CAL.msg='Esa dirección no parece de Google Calendar. Debe empezar con https://calendar.google.com/calendar/ical/ y terminar en .ics.';render();return true}
+    if(lines.length>5){CAL.msg='Hasta 5 calendarios.';render();return true}
+    if(!sb||!auth.user){toast('Inicia sesión para conectar tu calendario');return true}
+    CAL.msg='';toast('Guardando…');
+    sb.from('cal_cfg').upsert({user_id:auth.user.id,urls:lines,updated_at:new Date().toISOString()},{onConflict:'user_id'}).then(function(r){
+      if(r.error){CAL.msg='No se pudo guardar. Revisa tu conexión e intenta de nuevo.';render();return}
+      CAL.cfg=lines;CAL.cfgLoaded=true;var ta=$('f-calurls');if(ta)ta.value='';render();toast('Guardado. Leyendo tu calendario…');
+      calSync(true).then(function(){if(CAL.st==='ok')toast(CAL.ev.length+(CAL.ev.length===1?' evento':' eventos')+' en tu Organizador')});
+    });
+    return true;
+  }
+  function calClick(a,b,id){
+    switch(a){
+      case 'calview': goSheet('calev',{x:id}); return true;
+      case 'calsync': calSync(true).then(function(){if(CAL.st==='err')toast('No pude actualizar tu calendario');}); return true;
+      case 'gocal': closeSheet(); ui.view='mas'; ui.msub='cal'; render(); window.scrollTo(0,0); return true;
+      case 'calhide': var e=calFind(id),h=calHide(),ix=-1; h.forEach(function(x,i){if(x.x===id)ix=i}); if(ix>-1){h.splice(ix,1);toast('Vuelve a aparecer en tu Organizador')}else if(e){h.push({x:e.ext,d:e.date,t:e.title});toast('Oculto en Aura. Sigue en Google Calendar.')} OG().calHide=h.filter(function(x){return x.d>=plusDays(T(),-60)}); save(); closeSheet(); render(); return true;
+      case 'calshow': OG().calHide=calHide().filter(function(x){return x.x!==id}); save(); render(); toast('Vuelve a aparecer en tu Organizador'); return true;
+      case 'calwk': var w=calFind(id); if(w){var wx=matchEx(w.title),mn=calMins(w)||(wx?wx.min:45); goSheet('workout',{ex:wx?wx.id:'',min:String(mn),minTyped:true,lastEx:wx?wx.id:'',it:'moderada',direct:true,ldate:w.date,ltime:w.time||'',note:wx?'':w.title})} return true;
+      case 'caldel': if(!CAL.del){CAL.del=true;render();return true} CAL.del=false; if(!sb||!auth.user)return true;
+        sb.from('cal_cfg').delete().eq('user_id',auth.user.id).then(function(r){if(r.error){toast('No se pudo desconectar');return}calReset();CAL.cfg=[];CAL.cfgLoaded=true;CAL.st='off';render();toast('Calendario desconectado')}); return true;
+    }
+    if(CAL.del&&a!=='caldel'){CAL.del=false}
+    return false;
   }
 
   /* ---------- Hábitos automáticos (rastreadores) ----------
@@ -1429,6 +1604,7 @@ button.obody{cursor:pointer}
       return o;
     }
     if(s==='daysum')return sumSheet();
+    if(s==='calev')return calEvSheet();
     return null;
   }
   function addBm(d,tm,bris,note){var l={kind:'bm',module:'Salud',title:'Deposición',date:d,time:tm};if(bris)l.bristol=+bris;if(note)l.note=note;addLog(l);return l}
@@ -2422,6 +2598,7 @@ button.obody{cursor:pointer}
   function bkMeta(x){var v=itemVal(x);return (x.fx&&!v.g?'':v.g+' g · ')+n0(v.kcal)+' kcal · P '+dc(v.p)+' g'}
   function totTxt(t){return '<b>'+n0(t.kcal)+' kcal</b><span>Proteína '+dc(t.p)+' g · Carbohidratos '+dc(t.c)+' g · Grasas '+dc(t.f)+' g</span>'}
   var QCH_P=[0.25,0.5,0.75,1,1.5,2,3],QCH_G=[50,100,150,200];
+  function szOf(id){var f=FOODS.filter(function(x){return x.id===id})[0];return f&&f.sz||null}
   function basketHtml(){
     var it=ui.form.items||[];
     if(!it.length)return '<div class="empty" id="basket">Busca abajo y toca un alimento para agregarlo.</div>';
@@ -2431,6 +2608,7 @@ button.obody{cursor:pointer}
       if(fd){
         o+='<div class="qrow"><button class="qb" type="button" data-act="bstep" data-v="'+i+':-1" aria-label="Menos">−</button><input class="qin" id="bq'+i+'" type="text" inputmode="decimal" autocomplete="off" data-bi="'+i+'" value="'+esc(String(x.q).replace('.',','))+'" aria-label="Cantidad de '+esc(v.n)+'"><button class="qb" type="button" data-act="bstep" data-v="'+i+':1" aria-label="Más">+</button><select class="qun" id="bu'+i+'" data-bu="'+i+'" aria-label="Unidad de '+esc(v.n)+'"><option value="p"'+(x.u==='p'?' selected':'')+'>porción</option><option value="g"'+(x.u==='g'?' selected':'')+'>gramos o ml</option></select></div>'+
           '<div class="qch" role="group" aria-label="Cantidades rápidas">'+(x.u==='g'?QCH_G:QCH_P).map(function(c){return '<button class="chip" type="button" data-act="bq" data-v="'+i+':'+c+'" aria-pressed="'+(Math.abs(q-c)<0.001)+'">'+(x.u==='g'?c+' g':fracTxt(c))+'</button>'}).join('')+'</div>'+
+          (szOf(fd.id)?'<div class="qch" role="group" aria-label="Tamaño"><span class="meta">Tamaño (1 unidad)</span>'+szOf(fd.id).map(function(z){return '<button class="chip" type="button" data-act="bsz" data-v="'+i+':'+z[1]+'" aria-pressed="'+(x.u==='g'&&Math.abs(q-z[1])<0.001)+'">'+z[0]+' · '+z[1]+' g</button>'}).join('')+'</div>':'')+
           '<button class="link" type="button" data-act="bedit" data-v="'+i+'">'+(isCat(fd.id)?'Ajustar valores de este alimento':'Editar este alimento')+'</button>';
       } else o+='<span class="meta">Cantidad guardada</span>';
       o+='</div>';
@@ -2559,6 +2737,7 @@ button.obody{cursor:pointer}
       case 'fadd': snap(); var fd=foodById(id); if(fd){var its=f.items||(f.items=[]),ex=its.filter(function(x){return x.fid===id&&x.u==='p'})[0]; if(ex)ex.q=qn(ex.q)+1; else its.push({fid:id,q:1,u:'p'}); f.fq=''; rerender(); toast('Agregado: '+fd.n)} return true;
       case 'cadd': snap(); var cc=BD().combos.filter(function(x){return x.id===id})[0]; if(cc){var its2=f.items||(f.items=[]); if(!its2.length){f.combo=cc.id;f.cname=cc.n;f.meal=cc.meal} cc.items.forEach(function(x){its2.push({fid:x.fid,q:x.q,u:x.u})}); f.fq=''; rerender(); toast('Agregado: '+cc.n)} return true;
       case 'bstep': snap(); var bs=v.split(':'),bx=(f.items||[])[+bs[0]]; if(bx&&!bx.fx){var q0=qn(bx.q),dr=+bs[1],nq; if(bx.u==='g')nq=Math.max(5,Math.round(q0/5)*5+dr*10); else nq=Math.max(0.25,dr>0?(q0<1?q0+0.25:q0+0.5):(q0>1?q0-0.5:q0-0.25)); bx.q=Math.round(nq*100)/100; rerender()} return true;
+      case 'bsz': snap(); var zs=v.split(':'),zx=(f.items||[])[+zs[0]]; if(zx){zx.u='g';zx.q=parseFloat(zs[1]);rerender()} return true;
       case 'bq': snap(); var qs=v.split(':'),qx=(f.items||[])[+qs[0]]; if(qx){qx.q=parseFloat(qs[1]);rerender()} return true;
       case 'bedit': snap(); var be=(f.items||[])[+v],bf=be&&!be.fx&&foodById(be.fid); if(bf){keepRet(); goSheet('food',{fid:bf.id,n:bf.n,cat:bf.cat,k:dc(bf.k),p:dc(bf.p),c:dc(bf.c),f:dc(bf.f),pn:bf.pn,pg:dc(bf.pg),orig:isCat(bf.id),direct:!ui.ret})} return true;
       case 'wopen': ui.ret=null; goSheet('water',{ml:'',direct:true,ldate:T()}); return true;
@@ -2898,7 +3077,7 @@ button.obody{cursor:pointer}
      el simulador aplica la tasa a toda la deuda y mantiene fijo el pago mínimo. */
   var DTY=[['tc','Tarjeta de crédito'],['lc','Línea de crédito'],['cc','Crédito de consumo'],['otro','Otra deuda']];
   var RATE0=2.5;
-  var MSUBS=[['belleza','Belleza'],['datos','Respaldo']];
+  var MSUBS=[['belleza','Belleza'],['cal','Calendario'],['datos','Respaldo']];
   function normFin(f){
     if(!f||typeof f!=='object')f={};
     ['debts','pays'].forEach(function(k){if(!Array.isArray(f[k]))f[k]=[]});
@@ -3001,9 +3180,9 @@ button.obody{cursor:pointer}
 
   /* Más: pestañas */
   function viewMas(){
-    var s=ui.msub==='datos'?'datos':'belleza',o=header('Belleza y respaldo de tus datos','Más');
+    var s=ui.msub==='datos'||ui.msub==='cal'?ui.msub:'belleza',o=header('Belleza, calendario y respaldo','Más');
     o+='<div class="seg cu" role="group" aria-label="Secciones de Más">'+MSUBS.map(function(x){return '<button type="button" data-act="msub" data-v="'+x[0]+'" aria-pressed="'+(s===x[0])+'">'+x[1]+'</button>'}).join('')+'</div>';
-    if(s==='datos')o+=viewRespaldo();else o+=listSection('Belleza · últimos 30 días',recent(function(l){return l.module==='Belleza'},30),'Sin rutinas de belleza anotadas.');
+    if(s==='datos')o+=viewRespaldo();else if(s==='cal')o+=viewCal();else o+=listSection('Belleza · últimos 30 días',recent(function(l){return l.module==='Belleza'},30),'Sin rutinas de belleza anotadas.');
     return o+'<p class="disc">Finanzas ahora tiene su propia pestaña abajo. Esta sección se abre con la «C» de arriba.</p>';
   }
   function viewRespaldo(){
@@ -3879,6 +4058,7 @@ button.obody{cursor:pointer}
     if(cuerpoSubmit(fm))return;
     if(finSubmit(fm))return;
     if(orgSubmit(fm))return;
+    if(calSubmit(fm))return;
     if(fm.id==='bulk-form'){var br=parseDates($('f-bulk').value),have={},add=0,dup=0;starts().forEach(function(x){have[x.date]=1});br.ok.forEach(function(ds){if(have[ds]){dup++;return}have[ds]=1;addPeriod(ds,'09:00');add++});
       ui.bulkText=br.bad.join('\n');ui.bulkMsg=br.bad.length?'No entendí '+(br.bad.length===1?'esta fecha':'estas fechas')+'. Corrígelas y vuelve a intentar.':'';if(!br.bad.length)ui.bulk=false;save();render();
       toast(add?'Agregué '+add+(add===1?' fecha':' fechas')+(dup?' · '+dup+' ya estaban':''):dup?'Esas fechas ya estaban anotadas':'No encontré fechas válidas');return}
@@ -3921,6 +4101,7 @@ button.obody{cursor:pointer}
     if(cuerpoClick(a,b,id))return;
     if(finClick(a,b,id))return;
     if(a==='logopen'){e.preventDefault();ui.logOpen=!ui.logOpen;render();return}
+    if(calClick(a,b,id))return;
     if(orgClick(a,b,id))return;
     var t=T(), it=id?find(id):null;
     switch(a){
