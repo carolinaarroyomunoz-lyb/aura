@@ -485,6 +485,7 @@ button.obody{cursor:pointer}
 .oend{align-self:flex-start}
 .ocal{display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; border-top:1px solid var(--line); padding-top:6px}
 .ocal .meta{min-width:0}
+.pskey{font-family:ui-monospace,Menlo,monospace; font-size:.8rem; padding:10px 12px; border-radius:12px; background:var(--field); border:1px solid var(--line); overflow-wrap:anywhere; user-select:all; -webkit-user-select:all}
 
 /* Hábitos automáticos */
 .habit .tv{font-size:.8rem; font-weight:700; font-variant-numeric:tabular-nums; overflow-wrap:anywhere}
@@ -966,7 +967,7 @@ button.obody{cursor:pointer}
       else if(!u&&ev==='SIGNED_OUT'){endSession()}
     });
     sb.auth.getSession().then(function(r){var ss=r.data&&r.data.session;if(ss&&ss.user){if(!auth.user){auth.user=ss.user;auth.checked=true;beginSync()}}else{auth.checked=true;render()}},function(){auth.checked=true;render()});
-    document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible'){refreshCloud();calSync(false)}});
+    document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible'){refreshCloud();calSync(false);pasosSync(false)}});
     window.addEventListener('online',function(){if(cloud.ready){cloud.chain=cloud.chain.then(syncNow);refreshCloud()}});
   }
   function beginSync(){
@@ -979,7 +980,7 @@ button.obody{cursor:pointer}
         // Cuenta nueva: no se suben los datos de ejemplo. Se abre Respaldo para pegar el respaldo del artefacto.
         cloud.last={};auth.fresh=true;state.items=state.items.filter(function(x){return !x.example});state.logs=state.logs.filter(function(x){return !x.example});
         ui.view='mas';ui.msub='datos';setStatus('nube');render();toast('Cuenta lista. Pega tu respaldo para traer tus datos.');return}
-      applyDocs(snap);setStatus('nube');safeRender();calSync(true);
+      applyDocs(snap);setStatus('nube');safeRender();calSync(true);pasosSync(true);
     },function(){setStatus('error');render()});
     if(cloud.ch)sb.removeChannel(cloud.ch);
     cloud.ch=sb.channel('docs-'+uid).on('postgres_changes',{event:'*',schema:'public',table:'docs',filter:'user_id=eq.'+uid},function(){refreshCloud()}).subscribe();
@@ -988,7 +989,7 @@ button.obody{cursor:pointer}
     if(cloud.ch&&sb)sb.removeChannel(cloud.ch);cloud.ch=null;
     auth.user=null;auth.fresh=false;cloud.ready=false;cloud.col=null;cloud.last={};FILES.assets=null;
     try{localStorage.removeItem(KEY);localStorage.removeItem('aura-fin-ui')}catch(e){}
-    calReset();
+    calReset();PS.at=0;PS.last=null;PS.hasKey=null;PS.key='';try{localStorage.removeItem('aura-atajo-clave')}catch(e){}
     state=seed();normHealth(state.health);state.body=normBody(state.body);state.fin=normFin(state.fin);state.org=normOrg(state.org);
     closeSheet();ui.view='dia';render();
   }
@@ -1402,6 +1403,107 @@ button.obody{cursor:pointer}
         calStore(left).then(function(r){if(r.error){toast('No se pudo quitar');return}CAL.cfg=left;if(!left.length){calReset();CAL.cfg=[];CAL.cfgLoaded=true;CAL.st='off';render()}else{render();calSync(true)}toast('Calendario quitado')}); return true;
     }
     if(CAL.rm>-1&&a!=='calrm'){CAL.rm=-1}
+    return false;
+  }
+
+  /* ---------- Pasos del iPhone (atajo «Aura pasos») ----------
+     El atajo de la app Atajos lee el total de pasos del día en la app Salud y lo manda a la función de Supabase «pasos»
+     (sin iniciar sesión, con una clave personal). La función lo guarda en la tabla pasos (user_id, fecha, pasos, updated_at).
+     Aura lee esa tabla al abrirse y al volver a la app (cada 2 minutos como máximo) y deja un registro steps con src:'iphone'
+     por día, que reemplaza lo anotado a mano ese día (el iPhone ya cuenta las caminatas).
+     La clave se crea aquí: se guarda en atajo_claves solo su huella SHA-256; la clave visible queda en este dispositivo
+     ('aura-atajo-clave' en localStorage) para poder copiarla otra vez. Crear una nueva invalida la anterior. */
+  var PASOS_URL=SB_URL+'/functions/v1/pasos',ATAJO='Aura pasos';
+  var PS={at:0,busy:false,last:null,hasKey:null,key:'',msg:''};
+  try{PS.key=localStorage.getItem('aura-atajo-clave')||''}catch(e){}
+  function pasosSync(force){
+    if(!sb||!auth.user||PS.busy)return Promise.resolve();
+    if(!force&&Date.now()-PS.at<120000)return Promise.resolve();
+    PS.busy=true;
+    return sb.from('pasos').select('fecha,pasos,updated_at').gte('fecha',plusDays(T(),-60)).order('fecha',{ascending:true}).then(function(r){
+      PS.busy=false;PS.at=Date.now();if(r.error||!Array.isArray(r.data))return;
+      var ch=false;
+      r.data.forEach(function(x){
+        var d=String(x.fecha).slice(0,10),n=+x.pasos||0,cur=logsOn(d,'steps'),c=cur[cur.length-1];
+        if(c&&c.src==='iphone'&&+c.steps===n)return;
+        state.logs=state.logs.filter(function(l){return !(l.kind==='steps'&&l.date===d)});
+        var u=new Date(x.updated_at),tm=isNaN(u)?'21:00':pad(u.getHours())+':'+pad(u.getMinutes());
+        addLog({kind:'steps',module:'Ejercicio',title:'Pasos',steps:n,date:d,time:tm,src:'iphone'});ch=true;
+      });
+      PS.last=r.data.length?r.data[r.data.length-1]:null;
+      if(ch)save();
+      if(ch||ui.view==='mas')safeRender();
+    },function(){PS.busy=false});
+  }
+  function pasosKeyLoad(){
+    if(!sb||!auth.user||PS.hasKey!==null)return;PS.hasKey='?';
+    sb.from('atajo_claves').select('creada,ultimo_uso').maybeSingle().then(function(r){PS.hasKey=r&&r.data?r.data:false;safeRender()},function(){PS.hasKey=null});
+  }
+  function hex(buf){return Array.prototype.map.call(new Uint8Array(buf),function(b){return ('0'+b.toString(16)).slice(-2)}).join('')}
+  function newKey(){var a=new Uint8Array(24);crypto.getRandomValues(a);var abc='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789',s='';for(var i=0;i<a.length;i++)s+=abc[a[i]%abc.length];return 'aura-'+s}
+  function copyText(txt,fallbackId){
+    var fb=function(){var el=$(fallbackId);if(el){el.focus();if(el.select)el.select();else{var rg=document.createRange();rg.selectNodeContents(el);var sl=window.getSelection();sl.removeAllRanges();sl.addRange(rg)}}toast('Selecciónalo y cópialo')};
+    try{navigator.clipboard.writeText(txt).then(function(){toast('Copiado')},fb)}catch(e){fb()}
+  }
+  function lastSeen(ts){if(!ts)return '';var d=new Date(ts),t=T(),ds=ymd(d);return (ds===t?'hoy':ds===plusDays(t,-1)?'ayer':dshort(ds))+' a las '+pad(d.getHours())+':'+pad(d.getMinutes())}
+  function viewPasos(){
+    pasosKeyLoad();if(!PS.at)pasosSync(true);
+    var o='',hk=PS.hasKey,today=stepsOn(T()),lt=logsOn(T(),'steps').filter(function(l){return l.src==='iphone'})[0];
+    o+='<section class="glass" style="padding:16px;display:flex;flex-direction:column;gap:8px"><p class="label">Pasos del iPhone</p>';
+    if(PS.last)o+='<p><b style="color:var(--ok)">Conectado.</b> Último envío: '+n0(PS.last.pasos)+' pasos ('+(String(PS.last.fecha).slice(0,10)===T()?'hoy':whenLabel(String(PS.last.fecha).slice(0,10)))+'), recibido '+lastSeen(PS.last.updated_at)+'.</p>';
+    else if(hk&&hk!=='?'&&hk.ultimo_uso)o+='<p class="muted">El atajo se usó '+lastSeen(hk.ultimo_uso)+'.</p>';
+    else o+='<p class="muted">Todavía no llegan pasos desde el iPhone. Crea tu clave y el atajo con los pasos de abajo.</p>';
+    o+='<p class="meta">Hoy: '+(today!=null?n0(today)+' pasos'+(lt?' · del iPhone':' · anotados a mano'):'sin pasos')+'</p>';
+    o+='<div class="btns"><a class="btn acc sm" href="shortcuts://run-shortcut?name='+encodeURIComponent(ATAJO)+'">Actualizar desde el iPhone</a><button class="btn line sm" type="button" data-act="pssync">Revisar si llegaron</button></div>';
+    o+='<p class="meta">«Actualizar desde el iPhone» abre la app Atajos y corre el atajo. Después vuelve a Aura.</p></section>';
+    // Paso 1: clave y dirección
+    o+='<section class="glass" style="padding:16px;display:flex;flex-direction:column;gap:10px"><p class="label">1 · Tu clave y la dirección</p>';
+    if(PS.key)o+='<p class="meta">Clave del atajo</p><div class="pskey" id="ps-key" tabindex="0">'+esc(PS.key)+'</div><div class="btns"><button class="btn line sm" type="button" data-act="pscopy" data-v="key">Copiar clave</button></div>';
+    else if(hk&&hk!=='?')o+='<p class="muted">Ya creaste una clave, pero no está guardada en este dispositivo. Si tu atajo ya funciona, no hagas nada. Si necesitas copiarla de nuevo, crea una nueva: la anterior deja de funcionar y hay que pegar la nueva en el atajo.</p>';
+    o+='<button class="btn '+(PS.key||hk?'line':'acc')+' sm" type="button" data-act="psnew" style="align-self:flex-start">'+(PS.key||hk?(PS.newc?'Toca de nuevo: la clave anterior dejará de funcionar':'Crear una clave nueva'):'Crear mi clave')+'</button>';
+    o+='<p class="meta">Dirección (URL) del atajo</p><div class="pskey" id="ps-url" tabindex="0">'+esc(PASOS_URL)+'</div><div class="btns"><button class="btn line sm" type="button" data-act="pscopy" data-v="url">Copiar dirección</button></div>';
+    o+='<p class="disc">La clave solo sirve para mandar pasos a tu Aura; no permite ver tus datos. Igual no la compartas.</p></section>';
+    // Paso 2: atajo
+    o+='<section><div class="sh"><h2>2 · Crear el <em>atajo</em></h2></div><p class="meta">En el iPhone, abre la app <b>Atajos</b> (ícono de cuadrados de colores). Si no la tienes, descárgala gratis desde la App Store.</p><ol class="clist" style="gap:8px">'+
+      '<li>Toca <b>+</b> (arriba a la derecha). Arriba toca el nombre y escribe <b>Aura pasos</b> (igual, con mayúscula y espacio).</li>'+
+      '<li>Toca <b>Agregar acción</b>, busca <b>Buscar muestras de salud</b> y tócala.</li>'+
+      '<li>En esa acción: donde dice <b>Tipo</b>, elige <b>Pasos</b>. Toca <b>Añadir filtro</b> → <b>Fecha de inicio</b> → <b>es hoy</b>. Más abajo, en <b>Agrupar por</b>, elige <b>Día</b>. (Así el total es igual al de la app Salud, sin contar dos veces el reloj.)</li>'+
+      '<li>Abajo, en la barra de búsqueda de acciones, busca <b>Calcular estadísticas</b> y tócala. Debe decir <b>Suma</b> de <b>Muestras de salud</b>.</li>'+
+      '<li>Busca <b>Redondear</b> y toca <b>Redondear número</b> (a unidades).</li>'+
+      '<li>Busca <b>Obtener contenido de URL</b> y tócala. Donde dice <b>URL</b>, pega la dirección que copiaste arriba.</li>'+
+      '<li>En esa misma acción toca <b>Mostrar más</b>: <b>Método</b> → <b>POST</b>. <b>Cuerpo de la solicitud</b> → <b>JSON</b>.</li>'+
+      '<li>Toca <b>Añadir nuevo campo</b> → <b>Texto</b>. En la clave escribe <b>clave</b> y en el valor pega tu clave.</li>'+
+      '<li>Toca otra vez <b>Añadir nuevo campo</b> → <b>Número</b>. En la clave escribe <b>pasos</b>; en el valor toca <b>Variable</b> (o la varita sobre el teclado) y elige <b>Número redondeado</b>.</li>'+
+      '<li>(Opcional) Busca <b>Mostrar notificación</b> y pon como texto <b>Contenido de URL</b>: así verás «Aura: N pasos guardados».</li>'+
+      '<li>Toca <b>▶︎</b> abajo para probarlo. La primera vez pide permiso para leer Salud: toca <b>Permitir</b> (solo Pasos). Luego vuelve aquí y toca <b>Revisar si llegaron</b>.</li></ol></section>';
+    // Paso 3: automatización
+    o+='<section><div class="sh"><h2>3 · Que corra <em>solo</em></h2></div><ol class="clist" style="gap:8px">'+
+      '<li>En Atajos, toca <b>Automatización</b> (abajo) → <b>+</b> o <b>Nueva automatización</b>.</li>'+
+      '<li>Elige <b>Hora del día</b>. Pon <b>12:00</b>, <b>Repetir: Diariamente</b>.</li>'+
+      '<li>Marca <b>Ejecutar inmediatamente</b> (no «tras confirmación») y desactiva <b>Notificar al ejecutar</b> si no quieres aviso.</li>'+
+      '<li>Toca <b>Siguiente</b> y elige el atajo <b>Aura pasos</b>.</li>'+
+      '<li>Repite para <b>18:00</b>, <b>21:00</b> y <b>23:50</b> (la de 23:50 deja el total final del día).</li></ol>'+
+      '<p class="disc">Cada envío reemplaza el total del día, así que da lo mismo cuántas veces corra. Si anotas minutos caminados a mano, el siguiente envío del iPhone los reemplaza (el iPhone ya los cuenta).</p></section>';
+    return o;
+  }
+  function pasosClick(a,b){
+    switch(a){
+      case 'gopasos': closeSheet(); ui.view='mas'; ui.msub='pasos'; render(); window.scrollTo(0,0); return true;
+      case 'pssync': pasosSync(true).then(function(){toast(PS.last?'Último envío: '+n0(PS.last.pasos)+' pasos':'Todavía no llegan pasos')}); return true;
+      case 'pscopy': if(b.getAttribute('data-v')==='key')copyText(PS.key,'ps-key');else copyText(PASOS_URL,'ps-url'); return true;
+      case 'psnew':
+        if((PS.key||PS.hasKey)&&!PS.newc){PS.newc=true;render();return true}
+        PS.newc=false;if(!sb||!auth.user||!window.crypto||!crypto.subtle){toast('No se pudo crear la clave aquí');return true}
+        var k=newKey();
+        crypto.subtle.digest('SHA-256',new TextEncoder().encode(k)).then(function(h){
+          return sb.from('atajo_claves').upsert({user_id:auth.user.id,clave_hash:hex(h),creada:new Date().toISOString(),ultimo_uso:null},{onConflict:'user_id'});
+        }).then(function(r){
+          if(r&&r.error){toast('No se pudo guardar la clave');return}
+          PS.key=k;PS.hasKey={creada:new Date().toISOString()};try{localStorage.setItem('aura-atajo-clave',k)}catch(e){}render();toast('Clave creada. Cópiala en el atajo.');
+        },function(){toast('No se pudo crear la clave')});
+        return true;
+    }
+    if(PS.newc&&a!=='psnew'){PS.newc=false}
     return false;
   }
 
@@ -2511,7 +2613,7 @@ button.obody{cursor:pointer}
     o+='<section><div class="sh"><h2>Agua y <em>pasos</em></h2></div>'+
       '<div class="row" style="flex-direction:column;align-items:stretch;gap:8px"><div class="stat"><div class="ttl">Agua · '+n0(w)+' de '+n0(wg)+' ml</div><span class="meta">'+dc(rd(w/bt))+' botellas</span></div><div class="bar"><span style="width:'+Math.min(100,Math.round(w*100/wg))+'%"></span></div>'+
       '<div class="btns"><button class="btn sm acc" type="button" data-act="water" data-v="'+bt+'">+ Botella · '+n0(bt)+' ml</button><button class="btn sm line" type="button" data-act="water" data-v="'+Math.round(bt/2)+'">+ ½ botella</button><button class="btn sm line" type="button" data-act="wopen">Otra cantidad</button></div></div>'+
-      '<div class="row"><div class="grow"><div class="ttl">Pasos · '+(b.steps!=null?n0(b.steps):'sin anotar')+'</div><div class="meta">Anota los pasos o los minutos que caminaste. Más adelante se conectarán solos.</div></div><button class="btn sm line" type="button" data-act="sheet" data-s="steps">Anotar</button></div></section>';
+      '<div class="row"><div class="grow"><div class="ttl">Pasos · '+(b.steps!=null?n0(b.steps):'sin anotar')+'</div><div class="meta">'+(logsOn(t,'steps').some(function(l){return l.src==='iphone'})?'Del iPhone · se actualizan solos.':'Anota los pasos o los minutos que caminaste, o <button class="link" type="button" data-act="gopasos" style="min-height:0;padding:0">conecta el iPhone</button>.')+'</div></div><button class="btn sm line" type="button" data-act="sheet" data-s="steps">Anotar</button></div></section>';
     var rows='';
     for(var i=1;i<=7;i++){var d=plusDays(t,-i),db=dayBal(d);if(!db.eat&&!db.ex)continue;
       rows+='<div class="row"><div class="grow"><div class="ttl">'+whenLabel(d)+'</div><div class="meta">Comido '+n0(db.eat)+(db.ok?' · gastado '+n0(db.burn):'')+(db.ex?' · ejercicio '+n0(db.ex):'')+'</div></div>'+(db.ok&&db.eat?'<span class="badge'+(Math.abs(db.bal)<=50?' mut':'')+'">'+sgn(db.bal)+'</span>':db.eat?'':'<span class="badge mut">sin comidas</span>')+'</div>'}
@@ -3098,7 +3200,7 @@ button.obody{cursor:pointer}
      el simulador aplica la tasa a toda la deuda y mantiene fijo el pago mínimo. */
   var DTY=[['tc','Tarjeta de crédito'],['lc','Línea de crédito'],['cc','Crédito de consumo'],['otro','Otra deuda']];
   var RATE0=2.5;
-  var MSUBS=[['belleza','Belleza'],['cal','Calendario'],['datos','Respaldo']];
+  var MSUBS=[['belleza','Belleza'],['cal','Calendario'],['pasos','Pasos'],['datos','Respaldo']];
   function normFin(f){
     if(!f||typeof f!=='object')f={};
     ['debts','pays'].forEach(function(k){if(!Array.isArray(f[k]))f[k]=[]});
@@ -3201,9 +3303,9 @@ button.obody{cursor:pointer}
 
   /* Más: pestañas */
   function viewMas(){
-    var s=ui.msub==='datos'||ui.msub==='cal'?ui.msub:'belleza',o=header('Belleza, calendario y respaldo','Más');
+    var s=/^(datos|cal|pasos)$/.test(ui.msub||'')?ui.msub:'belleza',o=header('Belleza, calendario, pasos y respaldo','Más');
     o+='<div class="seg cu" role="group" aria-label="Secciones de Más">'+MSUBS.map(function(x){return '<button type="button" data-act="msub" data-v="'+x[0]+'" aria-pressed="'+(s===x[0])+'">'+x[1]+'</button>'}).join('')+'</div>';
-    if(s==='datos')o+=viewRespaldo();else if(s==='cal')o+=viewCal();else o+=listSection('Belleza · últimos 30 días',recent(function(l){return l.module==='Belleza'},30),'Sin rutinas de belleza anotadas.');
+    if(s==='datos')o+=viewRespaldo();else if(s==='cal')o+=viewCal();else if(s==='pasos')o+=viewPasos();else o+=listSection('Belleza · últimos 30 días',recent(function(l){return l.module==='Belleza'},30),'Sin rutinas de belleza anotadas.');
     return o+'<p class="disc">Finanzas ahora tiene su propia pestaña abajo. Esta sección se abre con la «C» de arriba.</p>';
   }
   function viewRespaldo(){
@@ -4122,6 +4224,7 @@ button.obody{cursor:pointer}
     if(cuerpoClick(a,b,id))return;
     if(finClick(a,b,id))return;
     if(a==='logopen'){e.preventDefault();ui.logOpen=!ui.logOpen;render();return}
+    if(pasosClick(a,b))return;
     if(calClick(a,b,id))return;
     if(orgClick(a,b,id))return;
     var t=T(), it=id?find(id):null;
