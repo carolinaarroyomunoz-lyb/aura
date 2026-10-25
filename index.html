@@ -903,13 +903,21 @@ button.pill svg{opacity:.7}
   function comboTot(c){return sumVals(c.items)}
   function dayFood(d){var t={kcal:0,p:0,c:0,f:0,unk:0};logsOn(d,'meal').forEach(function(l){if(typeof l.kcal==='number'){t.kcal+=l.kcal;t.p+=l.p||0;t.c+=l.c||0;t.f+=l.f||0}else{t.unk++;t.p+=+l.protein||0}});return t}
 
-  /* Balance del día */
+  /* Balance del día
+     Hoy (versión 21) el gasto en reposo se va sumando de a poco: el metabolismo basal (TMB) corre las 24 horas desde la
+     medianoche (también se gasta durmiendo) y la «vida diaria» (TMB × (factor − 1)) se reparte entre las horas activas
+     (DAYON a DAYOFF). Pasos y ejercicio cuentan lo anotado. La meta del día y «te quedan» siguen usando el día completo
+     (baseFull), para que la meta no cambie con la hora. Los días pasados usan siempre el día completo. */
+  var DAYON=7,DAYOFF=23;
+  function dayPart(){var n=new Date(),m=n.getHours()*60+n.getMinutes();return {all:Math.min(1,m/1440),act:Math.max(0,Math.min(1,(m-DAYON*60)/((DAYOFF-DAYON)*60))),hm:nowHM()}}
   function dayBal(d){
     var p=PF(),ok=profOk(),b=ok?bmr():0,st=stepsOn(d),fac=st!=null?1.2:(ACT[p.act]||ACT.sed)[0];
-    var base=Math.round(b*fac),stK=st!=null&&ok?stepKcal(st):0;
+    var baseFull=Math.round(b*fac),stK=st!=null&&ok?stepKcal(st):0;
+    var live=ok&&d===T(),pt=live?dayPart():null,bNow=live?Math.round(b*pt.all):b,aNow=live?Math.round(b*(fac-1)*pt.act):baseFull-b;
+    var base=live?bNow+aNow:baseFull;
     var ex=logsOn(d,'workout').reduce(function(s,l){return s+wkKcal(l)},0);
-    var fo=dayFood(d),burn=base+stK+ex,adj=(GOALS[p.goal]||GOALS.mant)[0];
-    return {ok:ok,bmr:b,fac:fac,base:base,steps:st,stK:stK,ex:ex,eat:fo.kcal,fo:fo,burn:burn,adj:adj,goal:burn+adj,left:burn+adj-fo.kcal,bal:fo.kcal-burn};
+    var fo=dayFood(d),burn=base+stK+ex,full=baseFull+stK+ex,adj=(GOALS[p.goal]||GOALS.mant)[0];
+    return {ok:ok,bmr:b,fac:fac,base:base,baseFull:baseFull,live:live,bNow:bNow,aNow:aNow,hm:live?pt.hm:'',steps:st,stK:stK,ex:ex,eat:fo.kcal,fo:fo,burn:burn,full:full,adj:adj,goal:full+adj,left:full+adj-fo.kcal,bal:fo.kcal-burn};
   }
   function targets(goalK){var pk=parseFloat(PF().pkg)||1.6,pr=Math.round(pk*exKg()),fat=Math.round(goalK*0.3/9),cb=Math.max(0,Math.round((goalK-pr*4-fat*9)/4));return {p:pr,c:cb,f:fat}}
   function aguaGoal(){var a=parseInt(PF().agua,10)||0;return a>=500?a:(a>0?a*250:2000)}
@@ -2711,7 +2719,7 @@ button.pill svg{opacity:.7}
     var b=dayBal(T());
     if(!b.ok&&!b.eat&&!b.ex)return '';
     return '<button class="glass balstrip" type="button" data-act="gocuerpo" data-v="balance"><span class="label">Balance de hoy · kcal</span><span class="bs3">'+
-      '<span><b>'+n0(b.eat)+'</b><small>comido</small></span><span><b>'+(b.ok?n0(b.burn):'—')+'</b><small>gastado</small></span><span><b>'+(b.ok?sgn(b.bal):'—')+'</b><small>'+(b.ok?balWord(b.bal):'faltan tus datos')+'</small></span></span></button>';
+      '<span><b>'+n0(b.eat)+'</b><small>comido</small></span><span><b>'+(b.ok?n0(b.burn):'—')+'</b><small>'+(b.live?'gastado a las '+b.hm:'gastado')+'</small></span><span><b>'+(b.ok?sgn(b.bal):'—')+'</b><small>'+(b.ok?balWord(b.bal):'faltan tus datos')+'</small></span></span></button>';
   }
   function eqRow(lab,val,sub){return '<div class="eqr"><span>'+lab+(sub?'<small>'+sub+'</small>':'')+'</span><b>'+val+'</b></div>'}
   function macrosHtml(fo,tg){
@@ -2721,20 +2729,22 @@ button.pill svg{opacity:.7}
   }
   function goalBar(b){
     var g=GOALS[PF().goal]||GOALS.mant,pc=b.goal>0?Math.min(100,Math.round(b.eat*100/b.goal)):0;
-    return '<div class="goal"><div class="stat"><span>Meta para «'+g[1].toLowerCase()+'»</span><b>'+n0(b.goal)+' kcal</b></div><div class="bar big"><span style="width:'+pc+'%'+(b.left<0?';background:var(--warn)':'')+'"></span></div><p class="meta">'+(b.left>=0?'Te quedan '+n0(b.left)+' kcal':'Pasaste tu meta por '+n0(-b.left)+' kcal')+(b.adj?' · incluye '+sgn(b.adj)+' kcal por tu objetivo':'')+'</p></div>';
+    return '<div class="goal"><div class="stat"><span>Meta para «'+g[1].toLowerCase()+'»</span><b>'+n0(b.goal)+' kcal</b></div><div class="bar big"><span style="width:'+pc+'%'+(b.left<0?';background:var(--warn)':'')+'"></span></div><p class="meta">'+(b.left>=0?'Te quedan '+n0(b.left)+' kcal':'Pasaste tu meta por '+n0(-b.left)+' kcal')+(b.adj?' · incluye '+sgn(b.adj)+' kcal por tu objetivo':'')+(b.live?' · la meta usa el gasto del día completo':'')+'</p></div>';
   }
   function protLine(b){var tp=targets(b.goal).p,pv=Math.round(b.fo.p);return '<p class="prot'+(pv>=tp?' okp':'')+'">'+(pv>=tp?'Llegaste a tu proteína: '+pv+' de '+tp+' g':'Proteína: '+pv+' de '+tp+' g · te faltan '+(tp-pv)+' g')+'</p>'}
   function viewBalance(){
     var t=T(),b=dayBal(t),o='',nw=logsOn(t,'workout').length;
     if(!b.ok)o+='<div class="note"><span>Completa tu peso, estatura y fecha de nacimiento para calcular cuánto gastas al día.</span><button class="btn sm" type="button" data-act="csub" data-v="datos">Completar mis datos</button></div>';
     o+='<div class="glass bal"><p class="label">Balance de hoy</p>';
-    o+=b.ok?'<div><p class="bign">'+sgn(b.bal)+' <small>kcal</small></p><p class="muted">'+cap(balWord(b.bal))+' calórico: comiste '+n0(b.eat)+' y gastaste '+n0(b.burn)+'.</p></div>'
+    o+=b.ok?'<div><p class="bign">'+sgn(b.bal)+' <small>kcal</small></p><p class="muted">'+cap(balWord(b.bal))+' calórico: comiste '+n0(b.eat)+' y '+(b.live?'llevas gastadas '+n0(b.burn)+' a las '+b.hm:'gastaste '+n0(b.burn))+'.</p></div>'
            :'<div><p class="bign">'+n0(b.eat)+' <small>kcal comidas</small></p></div>';
     o+='<div class="eq">'+
-      eqRow('Reposo y vida diaria',b.ok?n0(b.base):'—',b.ok?'TMB '+n0(b.bmr)+' × '+String(b.fac).replace('.',',')+(b.steps!=null?' (con pasos anotados)':''):'Faltan tus datos')+
+      (b.live?eqRow('Metabolismo basal',n0(b.bNow),'de '+n0(b.bmr)+' en el día · corre las 24 horas, también durmiendo')+
+        eqRow('Vida diaria',n0(b.aNow),'de '+n0(b.baseFull-b.bmr)+' · se reparte entre las '+DAYON+':00 y las '+DAYOFF+':00'+(b.steps!=null?' (con pasos anotados)':'')):
+        eqRow('Reposo y vida diaria',b.ok?n0(b.base):'—',b.ok?'TMB '+n0(b.bmr)+' × '+String(b.fac).replace('.',',')+(b.steps!=null?' (con pasos anotados)':''):'Faltan tus datos'))+
       eqRow('Pasos',b.steps!=null?'+'+n0(b.stK):'—',b.steps!=null?n0(b.steps)+' pasos':'Sin anotar hoy')+
       eqRow('Ejercicio','+'+n0(b.ex),nw?nw+(nw===1?' entrenamiento':' entrenamientos'):'Sin entrenamientos hoy')+
-      '<div class="eqr tot"><span>Gasto total</span><b>'+(b.ok?n0(b.burn):'—')+'</b></div>'+
+      '<div class="eqr tot"><span>'+(b.live?'Gasto hasta ahora<small>al final del día, unas '+n0(b.full)+' kcal</small>':'Gasto total')+'</span><b>'+(b.ok?n0(b.burn):'—')+'</b></div>'+
       eqRow('Comido',n0(b.eat),b.fo.unk?b.fo.unk+(b.fo.unk===1?' comida sin calcular':' comidas sin calcular'):'')+
       '</div>';
     if(b.ok)o+=goalBar(b)+protLine(b);
