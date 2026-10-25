@@ -1,1 +1,38 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><style>.b{fill:#F1ECFA}.o{fill:#DCD3F5}.m{fill:#B7A8EE}.c{fill:#5A48C8}@media (prefers-color-scheme:dark){.b{fill:#15111F}.o{fill:#2C2350}.m{fill:#4A3D8C}.c{fill:#A898FF}}</style><rect class="b" width="120" height="120" rx="28"/><ellipse class="o" cx="60" cy="60" rx="46" ry="39" transform="rotate(-20 60 60)"/><ellipse class="m" cx="57" cy="63" rx="32" ry="27" transform="rotate(28 57 63)"/><ellipse class="c" cx="54" cy="66" rx="17" ry="15" transform="rotate(-12 54 66)"/></svg>
+<!-- Ícono de Aura (v2, 24 oct 2026): amanecer con colinas y un camino. Los PNG (icono-192, icono-512, apple-touch-icon) son la misma imagen sin esquinas redondeadas. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <title>Aura</title>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#C7ABEA"/>
+      <stop offset=".55" stop-color="#DDBFEC"/>
+      <stop offset="1" stop-color="#F2D4EA"/>
+    </linearGradient>
+    <radialGradient id="sun" cx=".45" cy=".4" r=".7">
+      <stop offset="0" stop-color="#FFF6F0"/>
+      <stop offset="1" stop-color="#F8E6EC"/>
+    </radialGradient>
+    <linearGradient id="hb1" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#B08AD8"/><stop offset="1" stop-color="#C6A6E2"/></linearGradient>
+    <linearGradient id="hb2" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#B996DE"/><stop offset="1" stop-color="#A27CD0"/></linearGradient>
+    <linearGradient id="hm1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9774CC"/><stop offset="1" stop-color="#8460BE"/></linearGradient>
+    <linearGradient id="hm2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8A66C4"/><stop offset="1" stop-color="#7552B4"/></linearGradient>
+    <linearGradient id="hf1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6E4CA6"/><stop offset="1" stop-color="#553786"/></linearGradient>
+    <linearGradient id="hf2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#66459E"/><stop offset="1" stop-color="#4B317B"/></linearGradient>
+    <linearGradient id="road" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E9CDEE"/><stop offset=".5" stop-color="#C9A6E2"/><stop offset="1" stop-color="#AE86D2"/></linearGradient>
+    <clipPath id="r"><rect width="512" height="512" rx="112"/></clipPath>
+  </defs>
+  <g clip-path="url(#r)">
+  <rect width="512" height="512" fill="url(#sky)"/>
+  <circle cx="256" cy="196" r="82" fill="url(#sun)"/>
+  <!-- colinas del fondo -->
+  <path d="M0 200 C36 184 74 172 112 174 C168 178 230 222 300 272 L300 512 L0 512 Z" fill="url(#hb1)"/>
+  <path d="M180 310 C212 296 228 282 246 266 C306 232 362 190 414 182 C450 177 484 184 512 194 L512 512 L180 512 Z" fill="url(#hb2)"/>
+  <!-- colinas del medio -->
+  <path d="M0 258 C80 248 170 256 250 280 C290 292 316 300 330 312 L330 512 L0 512 Z" fill="url(#hm1)"/>
+  <path d="M296 302 C340 282 410 240 512 226 L512 512 L205 512 L205 356 C232 340 268 318 296 302 Z" fill="url(#hm2)"/>
+  <!-- colinas del frente -->
+  <path d="M0 330 C90 318 180 330 240 362 C278 384 296 420 280 512 L0 512 Z" fill="url(#hf1)"/>
+  <path d="M286 378 C350 344 420 318 512 312 L512 512 L300 512 C318 470 316 420 286 378 Z" fill="url(#hf2)"/>
+  <!-- camino -->
+  <path d="M272 290 C300 288 330 290 336 298 C342 310 300 322 268 334 C240 344 226 352 236 362 C252 378 300 392 322 414 C346 438 350 478 336 512 L84 512 C150 496 230 478 262 452 C290 430 270 410 240 396 C200 378 172 364 178 346 C186 326 230 314 270 304 C292 298 296 294 272 290 Z" fill="url(#road)"/>
+  </g>
+</svg>

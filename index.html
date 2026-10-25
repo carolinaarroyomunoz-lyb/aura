@@ -484,6 +484,34 @@ button.obody{cursor:pointer}
 .onow::after{content:""; flex:1; height:1.5px; background:var(--warn); border-radius:1px}
 .oend{align-self:flex-start}
 .ocal{display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; border-top:1px solid var(--line); padding-top:6px}
+/* Calendario del mes */
+button.pill{color:var(--ink); cursor:pointer}
+button.pill svg{opacity:.7}
+.mhead{display:flex; align-items:center; justify-content:space-between; gap:10px}
+.mhead b{font-family:var(--display); font-weight:400; font-size:1.5rem; text-transform:capitalize}
+.mhead .mnav{display:flex; gap:8px; align-items:center}
+.mhead .mnav button.nv{width:44px; height:44px; border-radius:50%; border:1px solid var(--line); background:var(--field); font-size:1.4rem; line-height:1; display:grid; place-items:center; padding:0; color:var(--ink)}
+.mgrid{display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:2px}
+.mgrid .mdw{text-align:center; font-size:.68rem; font-weight:700; color:var(--muted); padding:2px 0 4px}
+.mcell{position:relative; display:flex; flex-direction:column; align-items:center; gap:2px; min-height:58px; padding:4px 0 5px; border:0; border-radius:14px; background:transparent; color:var(--ink); min-width:0}
+.mcell.out{opacity:.35}
+.mcell .mn{position:relative; width:34px; height:34px; display:grid; place-items:center; font-variant-numeric:tabular-nums; font-size:.95rem}
+.mcell .mn svg{position:absolute; inset:0}
+.mcell .mn span{position:relative}
+.mcell.today .mn span{display:grid; place-items:center; width:26px; height:26px; border-radius:50%; background:var(--accent); color:var(--accent-ink); font-weight:700}
+.mcell[aria-pressed="true"]{background:var(--soft)}
+.mcell .mdots{display:flex; gap:3px; height:6px}
+.mcell .mdots i{width:6px; height:6px; border-radius:50%}
+.mleg{display:flex; flex-wrap:wrap; gap:6px 14px; font-size:.78rem; color:var(--muted)}
+.mleg span{display:inline-flex; align-items:center; gap:5px}
+.mleg i{width:8px; height:8px; border-radius:50%; display:inline-block}
+.mlist{display:flex; flex-direction:column; gap:2px}
+.mrow{display:flex; align-items:flex-start; gap:10px; padding:9px 4px; border:0; border-bottom:1px solid var(--line); background:transparent; text-align:left; color:var(--ink); width:100%}
+.mrow:last-child{border-bottom:0}
+.mrow .mt{flex:0 0 46px; font-variant-numeric:tabular-nums; font-size:.85rem; color:var(--muted); padding-top:1px}
+.mrow .md{flex:0 0 auto; width:9px; height:9px; border-radius:50%; margin-top:6px}
+.mrow .mb{min-width:0; flex:1}
+.mrow.done .ttl{text-decoration:line-through; opacity:.6}
 .ocal .meta{min-width:0}
 .pskey{font-family:ui-monospace,Menlo,monospace; font-size:.8rem; padding:10px 12px; border-radius:12px; background:var(--field); border:1px solid var(--line); overflow-wrap:anywhere; user-select:all; -webkit-user-select:all}
 
@@ -1270,7 +1298,7 @@ button.obody{cursor:pointer}
     var ds=orgDay(),t=T(),today=ds===t,a=agenda(ds),c=orgCount(ds);
     var late=a.filter(function(o){return o.late&&!o.done}),free=a.filter(function(o){return !o.late&&!o.time}),
         timed=a.filter(function(o){return !o.late&&o.time}).sort(function(x,y){return x.time<y.time?-1:x.time>y.time?1:0});
-    var o='<section class="glass org" aria-label="Organizador"><div class="sh"><div><p class="label">Organizador</p><h2 class="serif orgt">'+dayTitle(ds)+'</h2></div><div class="orgtools">'+(today?'':'<button class="link" type="button" data-act="oday" data-v="'+t+'">Hoy</button>')+'<button class="btn sm acc" type="button" data-act="onew">Agregar</button></div></div>';
+    var o='<section class="glass org" aria-label="Organizador"><div class="sh"><div><p class="label">Organizador</p><h2 class="serif orgt">'+dayTitle(ds)+'</h2></div><div class="orgtools">'+(today?'':'<button class="link" type="button" data-act="oday" data-v="'+t+'">Hoy</button>')+'<button class="btn sm line" type="button" data-act="month" data-v="'+ds+'">Mes</button><button class="btn sm acc" type="button" data-act="onew">Agregar</button></div></div>';
     o+=weekStrip();
     if(c.n||(ds>t&&c.all)){var pc=Math.round(c.d*100/c.n);o+='<div class="ocount"><span>'+(ds>t?c.all+(c.all===1?' cosa planificada':' cosas planificadas'):c.d+' de '+c.n+' listas')+'</span>'+(ds>t?'':'<div class="bar"><span style="width:'+pc+'%"></span></div>')+'</div>'}
     if(!a.length)o+='<div class="empty">'+(ds>t?'Nada planificado para este día. Agrega una tarea, un evento o un recordatorio.':today?'Tu agenda de hoy está libre. Lo que agregues en las demás secciones aparece aquí.':'No hay nada anotado ese día.')+'</div>';
@@ -1292,7 +1320,7 @@ button.obody{cursor:pointer}
        · Calendarios de iCloud (Casa, Trabajo…): enlace de «Calendario público» (webcal://pXX-caldav.icloud.com/published/…).
        · Suscripciones (por ejemplo, partidos de Universidad Católica): la URL de la suscripción.
        · Google Calendar: «Dirección secreta en formato iCal».
-     La función de Supabase «calendario» los descarga y devuelve los eventos desde 14 días atrás hasta 60 adelante.
+     La función de Supabase «calendario» los descarga y devuelve los eventos desde 62 días atrás hasta 185 adelante (vista del mes).
      Aura no cambia ni borra nada en el calendario: «Ocultar en Aura» guarda el evento en org.calHide [{x (ext), d (fecha), t (título)}].
      Los eventos se guardan solo en este dispositivo (localStorage 'aura-cal') para verlos sin conexión; se actualizan
      al abrir la app, al volver a ella (cada 10 minutos como máximo) y con «Actualizar». */
@@ -1357,7 +1385,7 @@ button.obody{cursor:pointer}
     if(!CAL.cfgLoaded||CAL.cfg===null)o+='<p class="muted">Cargando…</p>';
     else if(!has)o+='<p class="muted">Aún no conectas ninguno. Agrega abajo los calendarios de tu iPhone, de a uno. Aura solo los lee: no cambia ni borra nada.</p>';
     else{
-      if(CAL.st==='ok'){var nx=CAL.ev.filter(function(e){return e.date>=T()}).length;o+='<p><b style="color:var(--ok)">Conectados.</b> '+nx+(nx===1?' evento':' eventos')+' en los próximos 60 días · actualizado '+calAgo()+'.</p>'}
+      if(CAL.st==='ok'){var nx=CAL.ev.filter(function(e){return e.date>=T()}).length;o+='<p><b style="color:var(--ok)">Conectados.</b> '+nx+(nx===1?' evento':' eventos')+' en los próximos meses · actualizado '+calAgo()+'.</p>'}
       else o+='<p class="muted">'+(CAL.busy?'Leyendo tus calendarios…':CAL.st==='err'?'<span class="late">No pude leer tus calendarios.</span> Toca Actualizar.':'Toca Actualizar para traer tus eventos.')+'</p>';
       saved.forEach(function(u,i){
         var c=CAL.cals[i],nm=c&&c.ok?c.name:calKind(u),sub=c?(c.ok?c.n+(c.n===1?' evento':' eventos'):'<span class="late">'+esc(CAL_ERR[c.error]||'No se pudo leer.')+'</span>'):calMask(u);
@@ -1696,6 +1724,75 @@ button.obody{cursor:pointer}
     var sc=dayScore(t);
     return '<button class="glass closing" type="button" data-act="dsum" data-v="'+t+'"><span class="cpet">'+petals(t,sc,96)+'</span><span class="grow"><span class="label">Cierre del día</span><span class="serif" style="display:block;font-size:1.4rem;line-height:1.15">'+scoreWord(sc.score)+'</span><span class="meta">Mira cómo estuvo cada área y qué dejar listo para mañana.</span></span></button>';
   }
+  /* ---------- Calendario del mes (hoja «mes») ----------
+     Se abre tocando la fecha de arriba (en cualquier vista) o con «Mes» en el Organizador. ui.form = {m:'AAAA-MM', sel:'AAAA-MM-DD'}.
+     Cada día muestra puntitos: un color por calendario conectado (CAL.ev), Aura (tareas, recordatorios, eventos, controles, exámenes, pagos)
+     y Entrenamiento (registros workout o eventos que calMod clasifica como Ejercicio). Los días pasados con registros llevan un anillo
+     con el puntaje del día (dayScore). Al tocar un día: su lista, «Ver ese día» (Organizador) y «+ Agregar». */
+  var MPAL=['#4F86C6','#C2507F','#2F7F86','#D9822B','#7A9A3A','#8A6BD1','#B0668F','#5F7A99'],MAURA='#5A48C8',MWK='#E0A23B';
+  var MESL=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  function monthAdd(m,n){var y=+m.slice(0,4),mo=+m.slice(5,7)-1+n;y+=Math.floor(mo/12);mo=((mo%12)+12)%12;return y+'-'+pad(mo+1)}
+  function calNames(){var seen=[];(CAL.cals||[]).forEach(function(c){if(c&&c.ok&&c.name&&seen.indexOf(c.name)<0)seen.push(c.name)});CAL.ev.forEach(function(e){var n=e.cal||'Calendario';if(seen.indexOf(n)<0)seen.push(n)});return seen}
+  function calColor(n){var l=calNames(),i=l.indexOf(n||'Calendario');return MPAL[(i<0?0:i)%MPAL.length]}
+  function monthMarks(ds){
+    var cols=[],seen={},add=function(c){if(!seen[c]){seen[c]=1;cols.push(c)}},n=0,wk=false;
+    calOn(ds).forEach(function(e){n++;if(calMod(e.title,e.cal)==='Ejercicio')wk=true;add(calColor(e.cal))});
+    agenda(ds).forEach(function(o){
+      if(/^(event|task|reminder|ctrl|exam|pay|pend)$/.test(o.k)){n++;add(MAURA)}
+      if(o.k==='log'&&logsOn(ds,'workout').some(function(l){return l.id===o.id}))wk=true;
+    });
+    if(wk){add(MWK)}
+    return {cols:cols.slice(0,4),n:n};
+  }
+  function monthRing(ds,t){
+    if(ds>t)return '';
+    var has=logsOn(ds).some(function(l){return l.kind!=='steps'})||agenda(ds).some(function(o){return o.act&&o.done});
+    if(!has)return '';
+    var sc=dayScore(ds).score,C=2*Math.PI*15,f=(C*Math.max(0.04,sc/100)).toFixed(1);
+    return '<svg viewBox="0 0 34 34" width="34" height="34" aria-hidden="true"><circle cx="17" cy="17" r="15" fill="none" style="stroke:var(--line)" stroke-width="2.2"></circle><circle cx="17" cy="17" r="15" fill="none" style="stroke:var(--accent)" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="'+f+' '+C.toFixed(1)+'" transform="rotate(-90 17 17)"></circle></svg>';
+  }
+  function monthDayList(ds){
+    var rows=[];
+    calOn(ds).forEach(function(e){rows.push({t:e.time||'',e:e.end||'',ttl:e.title,sub:[e.cal||'Calendario',e.place].filter(Boolean).join(' · '),c:calColor(e.cal),act:'data-act="calview" data-id="'+esc(e.ext)+'"'})});
+    agenda(ds).forEach(function(o){
+      if(o.k==='cal'||o.k==='info'||o.k==='plan')return;
+      if(o.k==='log'&&!logsOn(ds,'workout').some(function(l){return l.id===o.id}))return;
+      var isWk=o.k==='log',act='';
+      if(o.k==='event'||o.k==='task'||o.k==='reminder')act='data-act="iedit" data-id="'+o.id+'"';
+      else if(o.k==='ctrl')act='data-act="hview" data-t="ctrl" data-id="'+o.id+'"';
+      else if(o.k==='exam')act='data-act="hview" data-t="exam" data-id="'+o.id+'"';
+      else if(o.k==='med')act='data-act="hview" data-t="treat" data-id="'+o.id+'"';
+      var tag=o.k==='task'?'Tarea':o.k==='reminder'?'Recordatorio':o.k==='event'?'Evento':o.k==='med'?'Dosis':isWk?'Entrenamiento':'';
+      rows.push({t:o.time||'',e:o.end||'',ttl:o.title,sub:[tag,o.sub].filter(Boolean).join(' · '),c:isWk?MWK:o.k==='med'?(MCOL.Salud):MAURA,act:act,done:!!o.done});
+    });
+    rows.sort(function(a,b){return (a.t||'99')<(b.t||'99')?-1:(a.t||'99')>(b.t||'99')?1:0});
+    return rows;
+  }
+  function monthSheet(){
+    var f=ui.form||{},t=T(),m=f.m||t.slice(0,7),sel=f.sel||t,y=+m.slice(0,4),mo=+m.slice(5,7);
+    var first=m+'-01',lead=(new Date(first+'T12:00').getDay()+6)%7,start=plusDays(first,-lead),dim=new Date(y,mo,0).getDate();
+    var cells=Math.ceil((lead+dim)/7)*7,o='';
+    o+='<div class="handle"></div><div class="top" style="align-items:flex-start"><div><p class="label">Calendario</p><h2 class="serif" style="font-size:1.9rem;font-weight:400">Tu <em>mes</em></h2></div><button class="close" type="button" data-act="close" aria-label="Cerrar">'+XMARK+'</button></div>';
+    o+='<div class="mhead"><b>'+MESL[mo-1]+' '+y+'</b><div class="mnav">'+(m!==t.slice(0,7)?'<button class="link" type="button" data-act="mtoday">Hoy</button>':'')+'<button class="nv" type="button" data-act="mmon" data-d="-1" aria-label="Mes anterior">‹</button><button class="nv" type="button" data-act="mmon" data-d="1" aria-label="Mes siguiente">›</button></div></div>';
+    o+='<div class="mgrid" role="grid" aria-label="'+MESL[mo-1]+' '+y+'">'+['L','M','M','J','V','S','D'].map(function(d){return '<span class="mdw" aria-hidden="true">'+d+'</span>'}).join('');
+    for(var i=0;i<cells;i++){
+      var ds=plusDays(start,i),inM=ds.slice(0,7)===m,mk=monthMarks(ds),dots=mk.cols.map(function(c){return '<i style="background:'+c+'"></i>'}).join('');
+      o+='<button type="button" class="mcell'+(inM?'':' out')+(ds===t?' today':'')+'" data-act="mday" data-v="'+ds+'" aria-pressed="'+(ds===sel)+'" aria-label="'+esc(cap(DOWL[new Date(ds+'T12:00').getDay()])+' '+dshort(ds)+(mk.n?', '+mk.n+(mk.n===1?' cosa':' cosas'):''))+'"><span class="mn">'+(inM?monthRing(ds,t):'')+'<span>'+(+ds.slice(8))+'</span></span><span class="mdots">'+dots+'</span></button>';
+    }
+    o+='</div>';
+    var leg=calNames().map(function(n){return '<span><i style="background:'+calColor(n)+'"></i>'+esc(n)+'</span>'});
+    leg.push('<span><i style="background:'+MAURA+'"></i>Aura</span>','<span><i style="background:'+MWK+'"></i>Entrenamiento</span>','<span><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.6" fill="none" style="stroke:var(--accent)" stroke-width="1.6"></circle></svg>Cómo te fue</span>');
+    o+='<div class="mleg">'+leg.join('')+'</div>';
+    // Día elegido
+    var rows=monthDayList(sel);
+    o+='<section id="mlist"><div class="sh" style="align-items:center"><h2 class="serif" style="font-size:1.4rem;font-weight:400">'+dayTitle(sel)+'</h2></div>';
+    o+=rows.length?'<div class="mlist">'+rows.map(function(r){var inner='<span class="mt">'+(r.t||'Todo el día')+(r.e?'<br>'+r.e:'')+'</span><i class="md" style="background:'+r.c+'"></i><span class="mb"><span class="ttl" style="display:block">'+esc(r.ttl)+'</span>'+(r.sub?'<span class="meta">'+esc(r.sub)+'</span>':'')+'</span>';return r.act?'<button class="mrow'+(r.done?' done':'')+'" type="button" '+r.act+'>'+inner+'</button>':'<div class="mrow'+(r.done?' done':'')+'">'+inner+'</div>'}).join('')+'</div>':'<p class="muted" style="font-size:.9rem">'+(sel<t?'No hay nada anotado ese día.':'Nada planificado para este día.')+'</p>';
+    if(sel<=t&&logsOn(sel).some(function(l){return l.kind!=='steps'})){var sc=dayScore(sel);o+='<button class="link" type="button" data-act="dsum" data-v="'+sel+'" style="align-self:flex-start">Resumen: '+scoreWord(sc.score).toLowerCase()+' · '+sc.score+'/100</button>'}
+    o+='<div class="btns"><button class="btn acc" type="button" data-act="mgo">Ver ese día</button><button class="btn line" type="button" data-act="madd2">+ Agregar</button></div></section>';
+    if(CAL.st==='ok')o+='<p class="meta">Tus calendarios llegan desde unos 2 meses atrás hasta 6 meses adelante.</p>';
+    else if(CAL.st!=='err')o+='<p class="meta">Conecta tus calendarios del iPhone en Más → Calendario para verlos aquí.</p>';
+    return o;
+  }
   function sumSheet(){
     var ds=ui.form.ds||T(),t=T(),sc=dayScore(ds),tips=dayTips(ds,sc),o='';
     o+='<div class="handle"></div><div class="top" style="align-items:flex-start"><div><p class="label">Resumen del día</p><h2 class="serif" style="font-size:1.9rem;font-weight:400">'+dayTitle(ds)+'</h2></div><button class="close" type="button" data-act="close" aria-label="Cerrar">'+XMARK+'</button></div>';
@@ -1756,6 +1853,7 @@ button.obody{cursor:pointer}
     }
     if(s==='daysum')return sumSheet();
     if(s==='calev')return calEvSheet();
+    if(s==='mes')return monthSheet();
     return null;
   }
   function addBm(d,tm,bris,note){var l={kind:'bm',module:'Salud',title:'Deposición',date:d,time:tm};if(bris)l.bristol=+bris;if(note)l.note=note;addLog(l);return l}
@@ -1784,6 +1882,12 @@ button.obody{cursor:pointer}
       case 'avsave': var n=0; (f.found||[]).forEach(function(x){if(x.dup)return;addLog({kind:'money',module:'Finanzas',title:x.desc,amount:x.amount,dir:x.dir,cat:x.cat,date:x.date,time:x.time,src:'aviso'});n++}); done(n+(n===1?' movimiento guardado':' movimientos guardados')); return true;
       case 'avfix': var x=(f.found||[])[+v]; if(x){goSheet('money',{dir:x.dir,amt:String(x.amount),cat:x.cat,desc:x.desc,ldate:x.date,ltime:x.time})} return true;
       case 'bris': snap(); f.bris=f.bris===v?'':v; rerender(); return true;
+      case 'month': var md=v&&/^\d{4}-\d{2}-\d{2}$/.test(v)?v:T(); goSheet('mes',{m:md.slice(0,7),sel:md}); return true;
+      case 'mmon': f.m=monthAdd(f.m||T().slice(0,7),+b.getAttribute('data-d')); f.sel=f.m===T().slice(0,7)?T():f.m+'-01'; renderSheet(); return true;
+      case 'mtoday': f.m=T().slice(0,7); f.sel=T(); renderSheet(); return true;
+      case 'mday': f.sel=v; if(v.slice(0,7)!==f.m)f.m=v.slice(0,7); renderSheet(); var ml=$('mlist'); if(ml&&ml.scrollIntoView)ml.scrollIntoView({block:'nearest'}); return true;
+      case 'mgo': ui.oday=f.sel||T(); ui.view='dia'; closeSheet(); render(); setTimeout(function(){var og=document.querySelector('.org');if(og&&og.scrollIntoView)og.scrollIntoView({block:'start'})},30); return true;
+      case 'madd2': goSheet('task',{ty:'task',date:(f.sel||T())<T()?T():(f.sel||T()),mod:'Casa'}); return true;
       case 'dsum': if(v>T())return true; if(ui.sheet!=='daysum'){goSheet('daysum',{ds:v})} else {ui.form.ds=v; renderSheet()} return true;
       case 'tmove': var tm=plusDays(T(),1),k=0; state.items.forEach(function(i){if(i.done)return;if(i.type==='task'&&(!i.due||i.due<=T())){i.due=tm;k++}else if(i.type==='reminder'&&i.date<=T()){i.date=tm;k++}}); save(); render(); renderSheet(); toast(k+(k===1?' pendiente pasó':' pendientes pasaron')+' a mañana'); return true;
     }
@@ -1793,7 +1897,7 @@ button.obody{cursor:pointer}
 
   /* ---------- Vistas ---------- */
   function header(eyebrow,title){
-    return '<div class="top"><button class="avatar" type="button" data-act="view" data-v="mas" aria-label="Más: belleza y respaldo">C</button><span class="pill">'+esc(new Date().toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'short'}).replace(/^./,function(c){return c.toUpperCase()}))+'</span></div>'+
+    return '<div class="top"><button class="avatar" type="button" data-act="view" data-v="mas" aria-label="Más: belleza y respaldo">C</button><button class="pill" type="button" data-act="month" aria-label="Ver el calendario del mes">'+esc(new Date().toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'short'}).replace(/^./,function(c){return c.toUpperCase()}))+'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2.5"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></button></div>'+
       '<div><p class="muted" style="font-size:.9rem;font-weight:500">'+eyebrow+'</p><h1>'+title+'</h1></div>';
   }
   function exampleNote(){

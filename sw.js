@@ -3,8 +3,9 @@
    - Íconos y manifest: copia guardada, que se renueva en segundo plano.
    - Librerías y fuentes (jsdelivr, cdnjs, Google Fonts): copia guardada.
    - Supabase (datos, sesión y archivos): nunca se guarda aquí; siempre va a la red.
-   Al cambiar archivos fijos, subir el número de CACHE para renovar la copia. */
-const CACHE = 'aura-v1';
+   Al cambiar archivos fijos, subir el número de CACHE para renovar la copia.
+   aura-v2 (24 oct 2026): ícono nuevo (amanecer con camino). */
+const CACHE = 'aura-v2';
 const CORE = ['./', 'index.html', 'manifest.json', 'icono.svg', 'apple-touch-icon.png', 'icono-192.png', 'icono-512.png'];
 const CDN = ['cdn.jsdelivr.net', 'cdnjs.cloudflare.com', 'fonts.googleapis.com', 'fonts.gstatic.com'];
 
