@@ -59,6 +59,7 @@ document.addEventListener('click',function(e){
   if(pasosClick(a,b))return;
   if(calClick(a,b,id))return;
   if(fotoClick(a))return;
+  if(avClick(a,b))return;
   if(orgClick(a,b,id))return;
   var t=T(), it=id?find(id):null;
   switch(a){
@@ -121,6 +122,7 @@ document.addEventListener('click',function(e){
 document.addEventListener('change',function(e){
   var t=e.target;if(!t||!t.matches)return;
   if(fotoChange(t))return;
+  if(avChange(t))return;
   if(t.matches('input[type=file][data-slot]')){addFiles(t.files,t.getAttribute('data-slot'));t.value='';return}
   if(t.matches('[data-rer]'))rerender();
 });

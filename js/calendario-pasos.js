@@ -195,6 +195,7 @@ function viewPasos(){
   if(PS.last)o+='<p><b style="color:var(--ok)">Conectado.</b> Último envío: '+n0(PS.last.pasos)+' pasos ('+(String(PS.last.fecha).slice(0,10)===T()?'hoy':whenLabel(String(PS.last.fecha).slice(0,10)))+'), recibido '+lastSeen(PS.last.updated_at)+'.</p>';
   else if(hk&&hk!=='?'&&hk.ultimo_uso)o+='<p class="muted">El atajo se usó '+lastSeen(hk.ultimo_uso)+'.</p>';
   else o+='<p class="muted">Todavía no llegan pasos desde el iPhone. Crea tu clave y el atajo con los pasos de abajo.</p>';
+  if(PS.last&&String(PS.last.fecha).slice(0,10)!==T()&&new Date().getHours()>=13)o+='<p class="late" style="font-size:.85rem">Hoy todavía no llega ningún envío. Lo más común: el iPhone estaba bloqueado a la hora de la automatización (ver «4 · Si no llegan»).</p>';
   o+='<p class="meta">Hoy: '+(today!=null?n0(today)+' pasos'+(lt?' · del iPhone':' · anotados a mano'):'sin pasos')+'</p>';
   o+='<div class="btns"><a class="btn acc sm" href="shortcuts://run-shortcut?name='+encodeURIComponent(ATAJO)+'">Actualizar desde el iPhone</a><button class="btn line sm" type="button" data-act="pssync">Revisar si llegaron</button></div>';
   o+='<p class="meta">«Actualizar desde el iPhone» abre la app Atajos y corre el atajo. Después vuelve a Aura.</p></section>';
@@ -223,9 +224,17 @@ function viewPasos(){
     '<li>En Atajos: <b>Biblioteca</b> → <b>Automatización</b> → <b>+</b> de abajo. Se abre un «Nuevo atajo»: es normal.</li>'+
     '<li>En el panel de abajo toca el botón azul <b>Automatización</b> → <b>Hora del día</b>.</li>'+
     '<li>Toca <b>Hora</b> y pon <b>12:00 p.m.</b> Toca la flechita: <b>Repetir: Cada día</b>, <b>Automatización</b> encendida, <b>Notificar</b> apagado.</li>'+
-    '<li>Busca <b>ejecutar atajo</b>, tócala y elige <b>Aura pasos</b>. Arriba: <b>Renombrar</b> → <b>Pasos 12:00</b>.</li>'+
+    '<li>Busca <b>ejecutar atajo</b>, tócala y elige <b>Aura pasos</b>. Debe quedar la acción «Ejecutar Aura pasos»: si te llega el aviso «Atajo vacío» o «no contiene acciones», a esa automatización le falta este paso. Arriba: <b>Renombrar</b> → <b>Pasos 12:00</b>.</li>'+
     '<li>Repite para <b>6:00 p.m.</b>, <b>9:00 p.m.</b> y <b>11:50 p.m.</b> (la de 11:50 p.m. deja el total final del día).</li></ol>'+
     '<p class="disc">Cada envío reemplaza el total del día, así que da lo mismo cuántas veces corra. Si anotas minutos caminados a mano, el siguiente envío del iPhone los reemplaza (el iPhone ya los cuenta).</p></section>';
+  // Paso 4: iPhone bloqueado (29 oct 2026)
+  o+='<section><div class="sh"><h2>4 · Si no <em>llegan</em></h2></div>'+
+    '<p class="meta">Con el iPhone <b>bloqueado</b>, Apple no deja que los atajos lean la app Salud: la automatización corre, pero no puede mandar nada y no avisa. Por eso a veces llegan los pasos de una hora y no los de otra.</p>'+
+    '<ol class="clist" style="gap:8px">'+
+    '<li>Agrega una automatización que corra cuando ya estás usando el iPhone: <b>Automatización</b> → <b>App</b> → elige una app que abras seguido (por ejemplo WhatsApp) → <b>Se abre</b>.</li>'+
+    '<li>En la flechita: <b>Automatización</b> encendida y <b>Notificar</b> apagado. Agrega <b>Ejecutar atajo</b> → <b>Aura pasos</b> y renómbrala <b>Pasos al abrir</b>.</li>'+
+    '<li>Deja también las de hora: si a esa hora tienes el iPhone en la mano, envían; si no, la de la app lo cubre.</li></ol>'+
+    '<p class="disc">El total final de un día solo llega si el atajo corre esa noche con el iPhone desbloqueado (por ejemplo, abriendo WhatsApp antes de dormir) o tocando «Actualizar desde el iPhone».</p></section>';
   return o;
 }
 function pasosClick(a,b){

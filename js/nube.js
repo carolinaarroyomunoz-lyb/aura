@@ -28,7 +28,7 @@ function startCloud(){
     else if(!u&&ev==='SIGNED_OUT'){endSession()}
   });
   sb.auth.getSession().then(function(r){var ss=r.data&&r.data.session;if(ss&&ss.user){if(!auth.user){auth.user=ss.user;auth.checked=true;beginSync()}}else{auth.checked=true;render()}},function(){auth.checked=true;render()});
-  document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible'){refreshCloud();calSync(false);pasosSync(false)}});
+  document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible'){refreshCloud();calSync(false);pasosSync(false);avSync(false)}});
   window.addEventListener('online',function(){if(cloud.ready){cloud.chain=cloud.chain.then(syncNow);refreshCloud()}});
 }
 function beginSync(){
@@ -41,7 +41,7 @@ function beginSync(){
       // Cuenta nueva: no se suben los datos de ejemplo. Se abre Respaldo para pegar el respaldo del artefacto.
       cloud.last={};auth.fresh=true;state.items=state.items.filter(function(x){return !x.example});state.logs=state.logs.filter(function(x){return !x.example});
       ui.view='mas';ui.msub='datos';setStatus('nube');render();toast('Cuenta lista. Pega tu respaldo para traer tus datos.');return}
-    applyDocs(snap);setStatus('nube');safeRender();calSync(true);pasosSync(true);fotoCheck();
+    applyDocs(snap);setStatus('nube');safeRender();calSync(true);pasosSync(true);fotoCheck();avCheck();avSync(false);
   },function(){setStatus('error');render()});
   if(cloud.ch)sb.removeChannel(cloud.ch);
   cloud.ch=sb.channel('docs-'+uid).on('postgres_changes',{event:'*',schema:'public',table:'docs',filter:'user_id=eq.'+uid},function(){refreshCloud()}).subscribe();
@@ -50,7 +50,7 @@ function endSession(){
   if(cloud.ch&&sb)sb.removeChannel(cloud.ch);cloud.ch=null;
   auth.user=null;auth.fresh=false;cloud.ready=false;cloud.col=null;cloud.last={};FILES.assets=null;
   try{localStorage.removeItem(KEY);localStorage.removeItem('aura-fin-ui')}catch(e){}
-  calReset();PS.at=0;PS.last=null;PS.hasKey=null;PS.key='';try{localStorage.removeItem('aura-atajo-clave')}catch(e){}
+  calReset();avReset();PS.at=0;PS.last=null;PS.hasKey=null;PS.key='';try{localStorage.removeItem('aura-atajo-clave')}catch(e){}
   state=seed();normHealth(state.health);state.body=normBody(state.body);state.fin=normFin(state.fin);state.org=normOrg(state.org);
   closeSheet();ui.view='dia';render();
 }

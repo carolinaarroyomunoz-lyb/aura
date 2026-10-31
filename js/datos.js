@@ -125,6 +125,7 @@ var cloud={col:null,ready:false,last:{},timer:null,chain:Promise.resolve(),dirty
 function save(){
   try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}
   if(cloud.ready){cloud.dirty=true;clearTimeout(cloud.timer);cloud.timer=setTimeout(function(){cloud.chain=cloud.chain.then(syncNow)},500)}
+  if(window.avSyncSoon)avSyncSoon(); // avisos: se rearma la lista de los próximos 14 días (js/avisos.js)
 }
 function docsOf(st){var o={salud:st.health||{},cuerpo:st.body||{},finanzas:st.fin||{},estado:{items:st.items,cfg:st.cfg||null,org:st.org||null}};st.logs.forEach(function(l){var k='logs-'+String(l.date||'sin-fecha').slice(0,7);(o[k]=o[k]||{logs:[]}).logs.push(l)});(st.doses||[]).forEach(function(d){var k='dosis-'+String(d.date||'sin-fecha').slice(0,7);(o[k]=o[k]||{doses:[]}).doses.push(d)});return o}
 function syncNow(){
